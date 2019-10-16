@@ -9,6 +9,7 @@ import com.santosh.stock_market.dto.JWTResponse;
 import com.santosh.stock_market.dto.UserDTO;
 import com.santosh.stock_market.service.JWTUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;

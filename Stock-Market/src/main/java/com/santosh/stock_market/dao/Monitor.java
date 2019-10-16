@@ -9,14 +9,15 @@ import java.util.List;
 @Service
 public class Monitor {
 
-  @Autowired
   private UserRepository userRepository;
   private List<User> users;
+  
   @Autowired
-  public Monitor(){
+  public Monitor(UserRepository userRepository){
     System.out.println("Application Started ");
+    this.userRepository = userRepository;
     users = userRepository.findAll();
-
+    System.out.print("Application done "+users.toString());
   }
 
   public List<User> getUsers() {

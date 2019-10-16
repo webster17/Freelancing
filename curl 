@@ -1,0 +1,5 @@
+curl -i -X POST -H 'Content-Type: application/json' -d '{"name": "New item", "year": "2009"}' http://rest-api.io/items
+
+curl -i -X POST -H 'Content-Type: application/json' -d '{"email":"sumitbusa@gmail.com", "password":"12345", "admin":"true", "name":"Sumit Busa"}' http://localhost:8090/auth/register
+
+curl -i -X POST -H 'Content-Type: application/json' -d '{"email":"sumit.busa@gmail.com", "password":"12345", "admin":"true", "name":"Sumit Busa"}' http://localhost:8090/auth/register

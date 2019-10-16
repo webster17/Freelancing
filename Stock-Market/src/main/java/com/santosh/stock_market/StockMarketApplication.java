@@ -12,9 +12,5 @@ public class StockMarketApplication {
     SpringApplication.run(StockMarketApplication.class, args);
     System.out.println("Server is running...");
   }
-
-  @Bean
-  public Monitor monitor(){
-
-  }
+  
 }

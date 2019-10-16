@@ -118,3 +118,4 @@ npm-debug.log
 .vscode
 *.log
 *.stackdump
+/.metadata/

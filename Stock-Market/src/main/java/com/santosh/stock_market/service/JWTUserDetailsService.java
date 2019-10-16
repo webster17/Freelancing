@@ -1,17 +1,16 @@
 package com.santosh.stock_market.service;
 
-import java.sql.SQLDataException;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Set;
 
 import com.santosh.stock_market.dao.Monitor;
 import com.santosh.stock_market.dao.UserRepository;
 import com.santosh.stock_market.model.User;
 import com.santosh.stock_market.dto.UserDTO;
+
+import org.apache.catalina.core.ApplicationContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -33,9 +32,15 @@ public class JWTUserDetailsService implements UserDetailsService {
     @Autowired
     private PasswordEncoder bCryptEncoder;
 //
-//    @Autowired
-//    private Monitor monitor;
-
+    @Autowired
+    private Monitor monitor;
+    
+    @Autowired
+    private ApplicationContext context;
+    
+    @Autowired
+    public void context(ApplicationContext context) { this.context = context; }
+    
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
@@ -67,17 +72,17 @@ public class JWTUserDetailsService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    @Modifying
     public User save(UserDTO userDTO) {
         User newUser = new User();
-//        System.out.println(monitor.getUsers());
+        System.out.println(monitor.getUsers());
 //            User newUser = new User();
             newUser.setEmail(userDTO.getEmail());
             newUser.setAdmin(userDTO.getAdmin());
             newUser.setName(userDTO.getName());
             newUser.setPassword(bCryptEncoder.encode(userDTO.getPassword()));
 
-
-            newUser = userRepository.save(newUser);
+            
         return newUser;
     }
 
