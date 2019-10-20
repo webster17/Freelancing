@@ -42,7 +42,7 @@ public class AuthController {
                 .loadUserByUsername(authenticationRequest.getEmail());
         final String token = jwtTokenUtil.generateToken(userDetails);
         User user = userDetailsService.getUserByEmail(authenticationRequest.getEmail());
-        return ResponseEntity.ok(new JWTResponse(user.getName(), user.getAdmin(), token));
+        return ResponseEntity.ok(new JWTResponse(user.getId(), user.getEmail(), user.getName(), user.getAdmin(), token));
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
@@ -60,7 +60,8 @@ public class AuthController {
             userDetailsService.save(user);
             return ResponseEntity.ok(otp);
         }else{
-            Map<String, String> responseData  = new HashMap<>();
+            Map<String, Object> responseData  = new HashMap<>();
+            responseData.put("data", user);
             responseData.put("MSG","Not Found Data");
             return ResponseEntity.badRequest().body(responseData);
         }
@@ -81,8 +82,9 @@ public class AuthController {
     }
 
     @GetMapping("getAuthenticated")
-    public User test(){
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public ResponseEntity<?> test(){
+        User user =  (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.ok(new JWTResponse(user.getId(), user.getEmail(), user.getName(), user.getAdmin(), ""));
     }
 
 

@@ -1,0 +1,54 @@
+<div class="login-box">
+	<div class="login-logo">
+		<b>Stock</b>Market
+	</div>
+	<!-- /.login-logo -->
+	<div class="card">
+		<div class="card-body login-card-body">
+			<p class="login-box-msg">Find your account</p>
+
+			<form ng-submit="findAccount()" name="findAccountForm" novalidate>
+				<div class="input-group mb-3">
+					<input type="email" name="email" ng-model="findAccountFormData.email" class="form-control"
+						placeholder="Email" ng-required="true" autocomplete=""
+						ng-class="(findAccountForm.email.$dirty || findAccountForm.email.$touched)?((findAccountForm.email.$invalid)?1:2):0|validationClass">
+					<div class="input-group-append">
+						<div class="input-group-text">
+							<span class="fas fa-envelope"></span>
+						</div>
+					</div>
+					<div class="invalid-feedback"
+						ng-show="(findAccountForm.email.$dirty || findAccountForm.email.$touched) && findAccountForm.email.$error.required">
+						Email can not be empty.</div>
+					<div class="invalid-feedback"
+						ng-show="(findAccountForm.email.$dirty || findAccountForm.email.$touched) && findAccountForm.email.$error.email">
+						Please enter valid email id.</div>
+				</div>
+				<div class="row">
+					<div class="col-12 text-center">
+						<p ng-class="formFeedback.class" ng-show="formFeedback.showable">{{ formFeedback.message }}</p>
+					</div>
+				</div>
+				<div class="row mb-4">
+					<div class="col-12">
+						<button type="submit" class="btn btn-primary btn-block btn-flat"
+							ng-disabled="(findAccountForm.$pristine || findAccountForm.$invalid) || disabledFindAccountButtonElement"
+							ng-bind-html="findAccountButtonElement">Find Account</button>
+					</div>
+					<!-- /.col -->
+					<div class="col-4">
+					</div>
+					<!-- /.col -->
+				</div>
+			</form>
+
+			<div class="row mb-1">
+				<div class="col-12 text-right">
+					<a ng-href="#login">Back to sign in?</a>
+				</div>
+			</div>
+		</div>
+		<!-- /.login-card-body -->
+	</div>
+</div>
+<!-- /.login-box -->

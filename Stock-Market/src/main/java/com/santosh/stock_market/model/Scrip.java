@@ -10,7 +10,7 @@ public class Scrip {
 
   @Id
   @GeneratedValue(strategy= GenerationType.IDENTITY)
-  @Column(name = "scrip_id")
+  @Column(name = "id")
   private long id;
 
   @Column(unique = true, nullable = false)

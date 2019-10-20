@@ -12,15 +12,15 @@ public class Profile {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "profile_id")
+  @Column(name = "id")
   private long id;
 
   @Column(unique = true, nullable = false)
   private String name;
 
   @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-  @JoinTable(name="profile_scrips", joinColumns={@JoinColumn(referencedColumnName="profile_id")}
-      , inverseJoinColumns={@JoinColumn(referencedColumnName="scrip_id")})
+  @JoinTable(name="profile_scrips", joinColumns={@JoinColumn(referencedColumnName="id")}
+      , inverseJoinColumns={@JoinColumn(referencedColumnName="id")})
   private Set<Scrip> scrips=new HashSet<>();
 
   public Set<Scrip> getScrips() {

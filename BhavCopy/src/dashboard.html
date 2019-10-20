@@ -1,0 +1,126 @@
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Dashboard</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item active">Home</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+  
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Records</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <div class="row mb-4 bg-secondary pt-2 pb-2">
+                <div class="col-md-2">
+                    <select class="form-control select2" style="width: 100%;">
+                        <option value="" disabled selected="selected">Select Profile</option>
+                        <option value="hurr">Profile 1</option>
+                        <option value="1">Bonus</option>
+                        <option value="2">Split</option>
+                      </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-control select2" style="width: 100%;">
+                        <option value="" disabled selected="selected">Select Scrip</option>
+                        <option value="hurr">Profile 1</option>
+                        <option value="1">Bonus</option>
+                        <option value="2">Split</option>
+                      </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="date" class="form-control " style="width: 100%;" />
+                </div>
+                <div class="col-md-2">
+                    <select class="form-control select2" style="width: 100%;">
+                        <option value="" disabled selected="selected">Select Time Frame</option>
+                        <option value="1">Daily</option>
+                        <option value="2">Weekly</option>
+                        <option value="3">Monthly</option>
+                        <option value="4">Yearly</option>
+                      </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-control select2" style="width: 100%;">
+                        <option value="" disabled selected="selected">Select Movement</option>
+                        <option value="1">Up Move</option>
+                        <option value="2">Down Move</option>
+                      </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-control select2" style="width: 100%;">
+                        <option value="" disabled selected="selected">Select Movement Type</option>
+                        <option value="1">Strong Move</option>
+                        <option value="2">Weak Move</option>
+                      </select>
+                </div>
+              </div>
+              <table id="example1" class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>No.</th>
+                    <th>Date</th>
+                    <th>Open</th>
+                    <th>High</th>
+                    <th>Low</th>
+                    <th>Close</th>
+                    <th>Volume</th>
+                    <th>Range</th>
+                    <th>Strong/Weak</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="record in records">
+                    <td>{{ record.id }}</td>
+                    <td>{{ record.date }}</td>
+                    <td>{{ record.open | number : 2 }}</td>
+                    <td>{{ record.high | number : 2 }}</td>
+                    <td>{{ record.low | number : 2 }}</td>
+                    <td>{{ record.close | number : 2}}</td>
+                    <td>{{ record.volume | number : 2}}</td>
+                    <td>{{ record.range | number : 2}}</td>
+                    <td>strong</td>
+                  </tr>
+                </tbody>
+                <!-- <tfoot>
+                  <tr>
+                    <th>Rendering engine</th>
+                    <th>Browser</th>
+                    <th>Platform(s)</th>
+                    <th>Engine version</th>
+                    <th>CSS grade</th>
+                  </tr>
+                  </tfoot> -->
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+  </div>
+  
+  <script>
+    $(function () {
+      $("#example1").DataTable();
+    });
+  </script>

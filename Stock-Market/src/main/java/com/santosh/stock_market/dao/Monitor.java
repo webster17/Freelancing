@@ -15,7 +15,7 @@ public class Monitor {
   @Autowired
   public Monitor(){
     System.out.println("Application Started ");
-    users = userRepository.findAll();
+//    users = userRepository.findAll();
 
   }
 

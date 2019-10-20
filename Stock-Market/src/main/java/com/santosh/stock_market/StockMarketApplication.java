@@ -14,7 +14,7 @@ public class StockMarketApplication {
   }
 
   @Bean
-  public Monitor monitor(){
-
+  public Monitor getMonitor(){
+    return new Monitor();
   }
 }
