@@ -1,103 +1,176 @@
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1>Dashboard</h1>
-          </div>
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item active">Home</li>
-            </ol>
-          </div>
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Dashboard</h1>
         </div>
-      </div><!-- /.container-fluid -->
-    </section>
-  
-    <!-- Main content -->
-    <section class="content">
-      <div class="row">
-        <div class="col-12">
-          <div class="card card-primary">
-            <div class="card-header">
-              <h3 class="card-title">Records</h3>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body">
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item active home">Home</li>
+          </ol>
+        </div>
+      </div>
+    </div><!-- /.container-fluid -->
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">Records</h3>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+
+            <form ng-submit="fetchFilteredRecord()" name="scanForm" novalidate>
               <div class="row mb-4 bg-secondary pt-2 pb-2">
                 <div class="col-md-2">
-                    <select class="form-control select2" style="width: 100%;">
-                        <option value="" disabled selected="selected">Select Profile</option>
-                        <option value="hurr">Profile 1</option>
-                        <option value="1">Bonus</option>
-                        <option value="2">Split</option>
-                      </select>
+                  <select class="form-control select2" style="width:100%;" name="selectedProfile"
+                    ng-model="scan.selectedProfile" ng-change="fetchProfileScrip()" style="width: 100%;"
+                    ng-required="true">
+                    <option value="" disabled selected>Select Profile</option>
+                    <option ng-repeat="profile in profiles " value="{{ profile.id }}">{{ profile.name }}</option>
+                  </select>
                 </div>
                 <div class="col-md-2">
-                    <select class="form-control select2" style="width: 100%;">
-                        <option value="" disabled selected="selected">Select Scrip</option>
-                        <option value="hurr">Profile 1</option>
-                        <option value="1">Bonus</option>
-                        <option value="2">Split</option>
-                      </select>
+                  <select class="form-control select2" ng-model="scan.selectedScrip" name="selectedScrip"
+                    style="width: 100%;" ng-required="true">
+                    <option value="" disabled selected>Select scrips</option>
+                    <option ng-repeat="scrip in scrips | limitTo:100" value="{{ scrip.id }}">{{ scrip.name }}</option>
+                  </select>
+                </div>
+                <div class="col-md-2 ">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="far fa-calendar-check" aria-hidden="true"></i>
+                      </span>
+                    </div>
+                    <input type="date" class="form-control" ng-model="scan.startDate" name="startDate"
+                      ng-required="true" />
+                  </div>
+                </div>
+                <div class="col-md-2  ">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="far fa-calendar-times" aria-hidden="true"></i>
+                      </span>
+                    </div>
+                    <input type="date" class="form-control" ng-model="scan.endDate" name="endDate" ng-required="true" />
+                  </div>
                 </div>
                 <div class="col-md-2">
-                    <input type="date" class="form-control " style="width: 100%;" />
+                  <select class="form-control select2" style="width: 100%;" ng-model="scan.timeFrame" name="timeFrame"
+                    ng-required="true">
+                    <option value="" disabled selected>Select Time Frame</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-control select2" style="width: 100%;">
-                        <option value="" disabled selected="selected">Select Time Frame</option>
-                        <option value="1">Daily</option>
-                        <option value="2">Weekly</option>
-                        <option value="3">Monthly</option>
-                        <option value="4">Yearly</option>
-                      </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-control select2" style="width: 100%;">
-                        <option value="" disabled selected="selected">Select Movement</option>
-                        <option value="1">Up Move</option>
-                        <option value="2">Down Move</option>
-                      </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-control select2" style="width: 100%;">
-                        <option value="" disabled selected="selected">Select Movement Type</option>
-                        <option value="1">Strong Move</option>
-                        <option value="2">Weak Move</option>
-                      </select>
+                <div class="offset-md-1 col-md-1">
+                  <div class="row justify-content-end pr-4">
+                    <button type="submit" class="btn bg-gradient-warning btn-md"
+                      ng-disabled="(scanForm.$pristine || scanForm.$invalid) || disabledScanButtonElement"
+                      ng-bind-html="scanButtonElement"></button>
+                  </div>
                 </div>
               </div>
-              <table id="example1" class="table table-bordered table-striped">
-                <thead>
-                  <tr>
-                    <th>No.</th>
-                    <th>Date</th>
-                    <th>Open</th>
-                    <th>High</th>
-                    <th>Low</th>
-                    <th>Close</th>
-                    <th>Volume</th>
-                    <th>Range</th>
-                    <th>Strong/Weak</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr ng-repeat="record in records">
-                    <td>{{ record.id }}</td>
-                    <td>{{ record.date }}</td>
-                    <td>{{ record.open | number : 2 }}</td>
-                    <td>{{ record.high | number : 2 }}</td>
-                    <td>{{ record.low | number : 2 }}</td>
-                    <td>{{ record.close | number : 2}}</td>
-                    <td>{{ record.volume | number : 2}}</td>
-                    <td>{{ record.range | number : 2}}</td>
-                    <td>strong</td>
-                  </tr>
-                </tbody>
-                <!-- <tfoot>
+            </form>
+            <table id="example1" class="table table-striped">
+              <thead>
+                <tr>
+                  <th class="text-center">No.</th>
+                  <th class="text-center">Date</th>
+                  <th class="text-center">Open</th>
+                  <th class="text-center">High</th>
+                  <th class="text-center no-sort">U/D</th>
+                  <th class="text-center">Low</th>
+                  <th class="text-center">Close</th>
+                  <th class="text-center">Volume</th>
+                  <th class="text-center">Range</th>
+                  <th class="text-center">Strong/Weak</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="home" ng-repeat="record in records" ng-click="showData($index)">
+                  <td>
+                    <div class="d-flex justify-content-center">{{ $index + 1 }}</div>
+                  </td>
+                  <td class="open-modal">
+                    <div class="d-flex justify-content-center">{{ record.date }}</div>
+                  </td>
+                  <td>
+                    <div class="d-flex flex-row-reverse justify-content-center">
+                      <div class="pl-1 pr-1 text-success" ng-show="record.open<record.close"><i
+                          class="fa fa-arrow-up"></i></div>
+                      <div class="pl-1 pr-1 text-danger" ng-show="record.open>record.close"><i
+                          class="fa fa-arrow-down"></i></div>
+                      <div class="pl-1 pr-1 text-secondary" ng-show="record.open==record.close"><i
+                          class="fa fa-minus"></i></div>
+                      <div class=" mr-2">{{ record.open | number : 2 }}</div>
+                    </div>
+                  <td>
+                    <div class="d-flex flex-row-reverse justify-content-center">
+                      <div class=" mr-2">{{ record.high | number : 2 }}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="d-flex justify-content-center">
+                      <div class="pl-1 pr-1" style="color: {{ record.highLowArrowColour }}"
+                        ng-show="record.highLowArrow=='Up'"><i class="fa fa-arrow-up"></i></div>
+                      <div class="pl-1 pr-1" style="color: {{record.highLowArrowColour}}"
+                        ng-show="record.highLowArrow=='Down'">
+                        <i class="fa fa-arrow-down"></i></div>
+                      <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
+                        ng-show="record.highLowArrow=='N-'">N-</div>
+                      <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
+                        ng-show="record.highLowArrow=='N-Up'"><i class="fa fa-arrow-up"></i>N-</i></div>
+                      <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
+                        ng-show="record.highLowArrow=='-N'">-N</div>
+                      <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
+                        ng-show="record.highLowArrow=='-NDown'">-N<i class="fa fa-arrow-down"></i></div>
+                      <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
+                        ng-show="record.highLowArrow=='|'">|</div>
+                      <div class="pl-1 pr-1 text-secondary" ng-show="record.highLowArrow=='-'"><i
+                          class="fa fa-minus"></i></div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="d-flex flex-row-reverse justify-content-center">
+                      {{ record.low | number : 2 }}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="d-flex flex-row-reverse justify-content-center">
+                      <div class="pl-1 pr-1 text-success" ng-show="record.close>record.previousClose"><i
+                          class="fa fa-arrow-up"></i></div>
+                      <div class="pl-1 pr-1 text-danger" ng-show="record.close<record.previousClose"><i
+                          class="fa fa-arrow-down"></i></div>
+                      <div class="pl-1 pr-1 text-secondary" ng-show="record.close==record.previousClose"><i
+                          class="fa fa-minus"></i></div>
+                      <div class=" mr-2">{{ record.close | number : 2 }}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="d-flex justify-content-center">{{ record.totalTradeQuantity/100000 | number : 2}}</div>
+                  </td>
+                  <td>
+                    <div class="d-flex justify-content-center">{{ (record.range) | number : 2}}</div>
+                  </td>
+                  <td>
+                    <div class="d-flex justify-content-center">{{record.moveType}}</div>
+                  </td>
+                </tr>
+              </tbody>
+              <!-- <tfoot>
                   <tr>
                     <th>Rendering engine</th>
                     <th>Browser</th>
@@ -106,21 +179,189 @@
                     <th>CSS grade</th>
                   </tr>
                   </tfoot> -->
-              </table>
-            </div>
-            <!-- /.card-body -->
+            </table>
           </div>
-          <!-- /.card -->
+          <!-- /.card-body -->
         </div>
-        <!-- /.col -->
+        <!-- /.card -->
       </div>
-      <!-- /.row -->
-    </section>
-    <!-- /.content -->
+      <!-- /.col -->
+    </div>
+    <!-- /.row -->
+  </section>
+  <!-- /.content -->
+</div>
+
+<div class="modal fade" id="myModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">{{ selectedRecord.scripName }} | {{ selectedRecord.date }}</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body">
+        <div class="row">
+          <div class="offset-md-1 col-md-1 mt-4">
+            <div class="row  justify-content-center">{{ selectedRecord.rangeList[0].risingChannel.higherTradedValue | number:2 }}</div>
+            <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[0].risingChannel.tradedValue | number:2 }}</div>
+            <div class="row  justify-content-center">{{ selectedRecord.rangeList[0].risingChannel.lowerTradedValue | number:2 }}</div>
+          </div>
+          <div class="col-md-1 mt-4">
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[1].risingChannel.higherTradedValue | number:2 }}</div>
+              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[1].risingChannel.tradedValue | number:2 }}</div>
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[1].risingChannel.lowerTradedValue | number:2 }}</div>
+          </div>
+          <div class="col-md-1 mt-4">
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[2].risingChannel.higherTradedValue | number:2 }}</div>
+              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[2].risingChannel.tradedValue | number:2 }}</div>
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[2].risingChannel.lowerTradedValue | number:2 }}</div>
+          </div>
+          <div class="col-md-1">
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[3].risingChannel.higherTradedValue | number:2 }}</div>
+              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[3].risingChannel.tradedValue | number:2 }}</div>
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[3].risingChannel.lowerTradedValue | number:2 }}</div>
+          </div>
+          <div class="col-md-1">
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[4].risingChannel.higherTradedValue | number:2 }}</div>
+              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[4].risingChannel.tradedValue | number:2 }}</div>
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[4].risingChannel.lowerTradedValue | number:2 }}</div>
+          </div>
+          <div class="col-md-1 mt-4">
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[5].risingChannel.higherTradedValue | number:2 }}</div>
+              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[5].risingChannel.tradedValue | number:2 }}</div>
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[5].risingChannel.lowerTradedValue | number:2 }}</div>
+          </div>
+          <div class="col-md-1 mt-4">
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[6].risingChannel.higherTradedValue | number:2 }}</div>
+              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[6].risingChannel.tradedValue | number:2 }}</div>
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[6].risingChannel.lowerTradedValue | number:2 }}</div>
+          </div>
+          <div class="col-md-1 mt-4">
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[7].risingChannel.higherTradedValue | number:2 }}</div>
+              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[7].risingChannel.tradedValue | number:2 }}</div>
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[7].risingChannel.lowerTradedValue | number:2 }}</div>
+          </div>
+          <div class="col-md-1 mt-4">
+              <div class="row  justify-content-center text-white">{{ selectedRecord.rangeList[7].risingChannel.higherTradedValue | number:2 }}</div>
+              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[8].risingChannel.tradedValue | number:2 }}</div>
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[8].risingChannel.lowerTradedValue | number:2 }}</div>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="row">
+              <div class="col-md-1 font-weight-bold">Close:</div>
+              <div class="col-md-1">{{ selectedRecord.previousClose| number:2 }}</div>
+              <div class="offset-md-7 col-md-1 font-weight-bold">ATR:</div>
+              <div class="col-md-2">some data</div>
+            </div>
+            <div class="row">
+              <div class="col-md-1 font-weight-bold">Range:</div>
+              <div class="col-md-1">{{ selectedRecord.previousRange | number:2}}</div>
+              <div class="offset-md-7"></div>
+              <div class="col-md-1 font-weight-bold">Move:</div>
+              <div class="col-md-2">some data</div>
+            </div>
+            <div class="row">
+              <div class="offset-md-9"></div>
+              <div class="col-md-1 font-weight-bold">SMA:</div>
+              <div class="col-md-2">some data</div>
+            </div>
+          </div>
+        </div>
+        <br><div class="row">
+            <div class="offset-md-1 col-md-1">
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[0].fallingChannel.higherTradedValue | number:2 }}</div>
+              <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[0].fallingChannel.tradedValue | number:2 }}</div>
+              <div class="row  justify-content-center">{{ selectedRecord.rangeList[0].fallingChannel.lowerTradedValue | number:2 }}</div>
+            </div>
+            <div class="col-md-1">
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[1].fallingChannel.higherTradedValue | number:2 }}</div>
+                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[1].fallingChannel.tradedValue | number:2 }}</div>
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[1].fallingChannel.lowerTradedValue | number:2 }}</div>
+            </div>
+            <div class="col-md-1">
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[2].fallingChannel.higherTradedValue | number:2 }}</div>
+                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[2].fallingChannel.tradedValue | number:2 }}</div>
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[2].fallingChannel.lowerTradedValue | number:2 }}</div>
+            </div>
+            <div class="col-md-1 mt-4">
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[3].fallingChannel.higherTradedValue | number:2 }}</div>
+                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[3].fallingChannel.tradedValue | number:2 }}</div>
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[3].fallingChannel.lowerTradedValue | number:2 }}</div>
+            </div>
+            <div class="col-md-1 mt-4">
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[4].fallingChannel.higherTradedValue | number:2 }}</div>
+                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[4].fallingChannel.tradedValue | number:2 }}</div>
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[4].fallingChannel.lowerTradedValue | number:2 }}</div>
+            </div>
+            <div class="col-md-1">
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[5].fallingChannel.higherTradedValue | number:2 }}</div>
+                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[5].fallingChannel.tradedValue | number:2 }}</div>
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[5].fallingChannel.lowerTradedValue | number:2 }}</div>
+            </div>
+            <div class="col-md-1">
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[6].fallingChannel.higherTradedValue | number:2 }}</div>
+                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[6].fallingChannel.tradedValue | number:2 }}</div>
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[6].fallingChannel.lowerTradedValue | number:2 }}</div>
+            </div>
+            <div class="col-md-1">
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[7].fallingChannel.higherTradedValue | number:2 }}</div>
+                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[7].fallingChannel.tradedValue | number:2 }}</div>
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[7].fallingChannel.lowerTradedValue | number:2 }}</div>
+            </div>
+            <div class="col-md-1">
+                <div class="row  justify-content-center text-white">{{ selectedRecord.rangeList[7].fallingChannel.higherTradedValue | number:2 }}</div>
+                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[8].fallingChannel.tradedValue | number:2 }}</div>
+                <div class="row  justify-content-center">{{ selectedRecord.rangeList[8].fallingChannel.lowerTradedValue | number:2 }}</div>
+            </div>
+          </div>
+      </div>
+
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+      </div>
+
+    </div>
   </div>
-  
-  <script>
-    $(function () {
-      $("#example1").DataTable();
+</div>
+
+
+<script>
+  $(function () {
+    $("#example1").DataTable({
+      "lengthMenu": [[500, 650, 1000, -1], [500, 650, 1000, "All"]],
+      "pageLength": 650,
+      "searching": false,
+      "columnDefs": [{
+        "targets": 'no-sort',
+        "orderable": false,
+      }]
     });
-  </script>
+
+    $('.home').on('click',function () {
+      // reset modal if it isn't visible
+      console.log('clicked')
+      if (!($('.modal.in').length)) {
+        $('.modal-dialog').css({
+          top: 0,
+          left: 0
+        });
+      }
+      $('#myModal').modal();
+
+      $('.modal-dialog').draggable({
+        handle: ".modal-header"
+      });
+    });
+    //     $('#example').dataTable( {
+    //     "pageLength": 50
+    // });
+  });
+</script>

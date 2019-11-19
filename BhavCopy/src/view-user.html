@@ -27,7 +27,7 @@
           </div>
           <!-- /.card-header -->
           <div class="card-body">
-            <table id="example1" class="table table-bordered table-striped">
+            <table id="example1" class="table table-bordered table-striped" datatable="ng">
               <thead>
                 <tr>
                   <th>No.</th>
@@ -44,10 +44,10 @@
                   <td>{{ user.email }}</td>
                   <td>{{ (user.admin)?'Admin':'-'}}</td>
                   <td>
-                    <a class='btn mr-2 btn-outline-primary btn-sm update' ng-href="{{'#/update/'+user.id}}">
+                    <a class='btn mr-2 btn-outline-primary btn-sm update' ng-href="{{'#/update-user/'+user.id}}">
                       <i class='fa fa-edit' aria-hidden="true"></i>
                     </a>
-                    <button class='btn btn-outline-danger btn-sm delete' ng-click="deleteStudent(user.id)"
+                    <button class='btn btn-outline-danger btn-sm delete' ng-click="deleteUser(user.id)"
                       ng-disabled="deleteDisabledButtonElement">
                       <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>

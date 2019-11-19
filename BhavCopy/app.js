@@ -1,5 +1,5 @@
 
-const app = angular.module('stockMarketApp', ['ngRoute', 'stockMarketAppController']);
+const app = angular.module('stockMarketApp', ['ngRoute', 'ngFileUpload', 'stockMarketAppController']);
 
 // const { remote } = require('electron');
 
@@ -23,7 +23,7 @@ app.config(['$routeProvider', function ($routeProvider) {
 				appService.isInitialized($location.url())
 			}
 		}
-	}).when('/set-new-password', {
+	}).when('/set-new-password/:email/:otp', {
 		templateUrl: 'set-new-password.html',
 		controller: 'setNewPasswordController',
 		resolve: {
@@ -63,6 +63,14 @@ app.config(['$routeProvider', function ($routeProvider) {
 				appService.isInitialized($location.url())
 			}
 		}
+	}).when('/change-app-pin', {
+		templateUrl: 'change-app-pin.html',
+		controller: 'changeAppPinController',
+		resolve: {
+			initialData: function (appService, $location) {
+				appService.isInitialized($location.url())
+			}
+		}
 	}).when('/add-user', {
 		templateUrl: 'add-user.html',
 		controller: 'addUserController',
@@ -72,7 +80,7 @@ app.config(['$routeProvider', function ($routeProvider) {
 			}
 		}
 	}).when('/update-user/:Id', {
-		templateUrl: 'src/update_user.html',
+		templateUrl: 'update-user.html',
 		controller: 'updateUserController',
 		resolve: {
 			initialData: function (appService, $location) {
@@ -95,8 +103,8 @@ app.config(['$routeProvider', function ($routeProvider) {
 				appService.isInitialized($location.url())
 			}
 		}
-	}).when('/updateProfile/:Id', {
-		templateUrl: 'src/update-profile.html',
+	}).when('/update-profile/:Id', {
+		templateUrl: 'update-profile.html',
 		controller: 'updateProfileController',
 		resolve: {
 			initialData: function (appService, $location) {
@@ -135,36 +143,32 @@ app.config(['$routeProvider', function ($routeProvider) {
 app.service('apiService', ['$http', '$window', function ($http, $window) {
 	let _baseUrl = 'http://localhost:8090';
 
-	// let _token = '';
-
-	// if ($window.localStorage['logedInUser'] != undefined) {
-	//     _token = JSON.parse($window.localStorage['logedInUser']).token;
-	// }
-	// let _headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _token, 'Accept': 'application/json' };
-
-
-	if ($window.localStorage['logedInUser'] != undefined)
-		if(JSON.parse($window.localStorage['logedInUser']).hasOwnProperty('token'))
-			$http.defaults.headers.common.Authorization = 'Bearer ' + JSON.parse($window.localStorage['logedInUser']).token;
+	this.initializeToken = (token) => {
+		$http.defaults.headers.common.Authorization = 'Bearer ' + token;
+	}
 
 	this.login = function (credentials) { return $http({ method: 'POST', url: _baseUrl + '/auth/login', data: credentials }); };
+	this.sendOTP = function (credentials) { return $http({ method: 'POST', url: _baseUrl + '/auth/sendOTP', data: credentials }); };
+	this.setNewPassword = function (credentials) { return $http({ method: 'POST', url: _baseUrl + '/auth/setNewPassword', data: credentials }); };
+	this.updatePassword = (credential) => { return $http({ method: 'POST', url: _baseUrl + '/auth/updatePassword', data: credential }); };
 	this.getAuthenticated = function () { return $http({ method: 'GET', url: _baseUrl + '/auth/getAuthenticated' }); };
-	this.findAccount = function (email) { return $http({ method: 'GET', url: _baseUrl + '/findAccount/' + email }); };
-	this.setNewPassword = function (credentials) { return $http({ method: 'POST', url: _baseUrl + '/setNewPassword', data: credentials }); };
 
-	this.getAllUser = function () { return $http({ method: 'GET', url: _baseUrl + '/user', headers: _headers }); };
-	this.getUser = function (id) { return $http({ method: 'GET', url: _baseUrl + '/user/' + id, headers: _headers }); };
-	this.addUser = function (user) { return $http({ method: 'POST', url: _baseUrl + '/user', headers: _headers, data: user }); };
-	this.updateUser = function (id, user) { return $http({ method: 'PUT', url: _baseUrl + '/user' + id, headers: _headers, data: user }); };
-	this.deleteUser = function (id) { return $http({ method: 'DELETE', url: _baseUrl + '/user/' + id, headers: _headers }); };
+	this.updateData = (date, rawData) => { return $http({ method: 'POST', url: _baseUrl + '/record/update/' + date, data: rawData }); };
+	this.getFilteredRecordData = (scripId, filterData) => { return $http({ method: 'POST', url: _baseUrl + '/record/filter/' + scripId, data: filterData }); };
 
-	this.getAllProfile = function () { return $http({ method: 'GET', url: _baseUrl + '/profile', headers: _headers }); };
-	this.getProfile = function (id) { return $http({ method: 'GET', url: _baseUrl + '/profile/' + id, headers: _headers }); };
-	this.addProfile = function (profile) { return $http({ method: 'POST', url: _baseUrl + '/profile', headers: _headers, data: profile }); };
-	this.updateProfile = function (id, profile) { return $http({ method: 'PUT', url: _baseUrl + '/profile' + id, headers: _headers, data: profile }); };
-	this.deleteProfile = function (id) { return $http({ method: 'DELETE', url: _baseUrl + '/profile/' + id, headers: _headers }); };
+	this.getAllUser = function () { return $http({ method: 'GET', url: _baseUrl + '/user' }); };
+	this.getUser = function (id) { return $http({ method: 'GET', url: _baseUrl + '/user/' + id }); };
+	this.addUser = function (user) { return $http({ method: 'POST', url: _baseUrl + '/user', data: user }); };
+	this.updateUser = function (id, user) { return $http({ method: 'PUT', url: _baseUrl + '/user/' + id, data: user }); };
+	this.deleteUser = function (id) { return $http({ method: 'DELETE', url: _baseUrl + '/user/' + id }); };
 
-	this.getAllScrip = function () { return $http({ method: 'GET', url: _baseUrl + '/scrip', headers: _headers }); };
+	this.getAllProfile = function () { return $http({ method: 'GET', url: _baseUrl + '/profile' }); };
+	this.getProfile = function (id) { return $http({ method: 'GET', url: _baseUrl + '/profile/' + id }); };
+	this.addProfile = function (profile) { return $http({ method: 'POST', url: _baseUrl + '/profile', data: profile }); };
+	this.updateProfile = function (id, profile) { return $http({ method: 'PUT', url: _baseUrl + '/profile/' + id, data: profile }); };
+	this.deleteProfile = function (id) { return $http({ method: 'DELETE', url: _baseUrl + '/profile/' + id }); };
+
+	this.getAllScrip = function () { return $http({ method: 'GET', url: _baseUrl + '/scrip' }); };
 
 	return this;
 }]);
@@ -176,6 +180,10 @@ app.service('authService', ['$window', 'apiService', function ($window, apiServi
 
 		if ($window.localStorage['logedInUser'] != undefined) {
 			var loginCredential = JSON.parse($window.localStorage['logedInUser']);
+
+			if (JSON.parse($window.localStorage['logedInUser']).hasOwnProperty('token'))
+				apiService.initializeToken(JSON.parse($window.localStorage['logedInUser']).token);
+
 			if (loginCredential.isAuthenticated && loginCredential.rememberMe) {
 				apiService.getAuthenticated().then(function (response) {
 					let data = response.data;
@@ -186,6 +194,8 @@ app.service('authService', ['$window', 'apiService', function ($window, apiServi
 					user.isAdmin = data.admin;
 					user.rememberMe = loginCredential.rememberMe;
 					user.token = loginCredential.token;
+
+					apiService.initializeToken(loginCredential.token);
 					$window.localStorage['logedInUser'] = JSON.stringify(user);
 					authorizedCallback(user);
 				}, function (response) {
@@ -196,7 +206,7 @@ app.service('authService', ['$window', 'apiService', function ($window, apiServi
 				$window.localStorage.removeItem('logedInUser');
 				unAuthorizedCallback();
 			}
-		}else {
+		} else {
 			$window.localStorage.removeItem('logedInUser');
 			unAuthorizedCallback();
 		}
@@ -218,6 +228,8 @@ app.service('authService', ['$window', 'apiService', function ($window, apiServi
 			else
 				user.rememberMe = false;
 			user.token = data.token;
+
+			apiService.initializeToken(data.token);
 			$window.localStorage['logedInUser'] = JSON.stringify(user);
 			authorizedCallback(user);
 		}, function (response, status, headers, config) {
@@ -242,7 +254,7 @@ app.service('authService', ['$window', 'apiService', function ($window, apiServi
 	}
 	return this;
 }]);
-app.service('appService', ['$window', '$location', 'authService', function ($window, $location, authService) {
+app.service('appService', ['$window', '$rootScope', '$location', function ($window, $rootScope, $location) {
 	let initialized = false;
 
 	this.isInitialized = (url) => {
@@ -255,6 +267,10 @@ app.service('appService', ['$window', '$location', 'authService', function ($win
 
 	this.init = () => {
 		initialized = true;
+		if ($window.localStorage['applicationPin'] != undefined)
+			$rootScope.applicationPin = $window.localStorage['applicationPin'];
+		else
+			$rootScope.applicationPin = "123456";
 	}
 
 	return this;
@@ -293,13 +309,85 @@ app.directive('allowNumbersOnly', () => {
 		restrict: "A",
 		link: function (scope, element, attrs) {
 			element.bind("keydown", function (event) {
-				if (!((event.keyCode > 47 && event.keyCode < 58) || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 13)) {
+				if (!((event.keyCode > 47 && event.keyCode < 58) || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 13 || event.keyCode == 17)) {
 					event.preventDefault();
 					return false;
 				}
 			});
 		}
 	}
+});
+
+app.directive('allowLettersAndSpaceOnly', function () {
+	return {
+		restrict: "A",
+		link: function (scope, element, attrs) {
+			element.bind("keydown", function (event) {
+				if (!((event.keyCode > 64 && event.keyCode < 91) || event.keyCode == 32 || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 13 || event.keyCode == 17)) {
+					event.preventDefault();
+					return false;
+				}
+			});
+		}
+	}
+})
+
+app.directive('eventFocus', function (focus) {
+	return function (scope, elem, attr) {
+		elem.on(attr.eventFocus, function () {
+			focus(attr.eventFocusId);
+		});
+
+		// Removes bound events in the element itself
+		// when the scope is destroyed
+		scope.$on('$destroy', function () {
+			elem.off(attr.eventFocus);
+		});
+	};
+});
+
+app.factory('focus', function ($timeout, $window) {
+	return function (id) {
+		// timeout makes sure that it is invoked after any other event has been triggered.
+		// e.g. click events that need to run before the focus or
+		// inputs elements that are in a disabled state but are enabled when those events
+		// are triggered.
+		$timeout(function () {
+			var element = $window.document.getElementById(id);
+			if (element)
+				element.focus();
+		});
+	};
+});
+
+app.directive('validFile', function () {
+	return {
+		require: 'ngModel',
+		link: function (scope, elem, attrs, ngModel) {
+			var validFormats = ['csv'];
+			elem.bind('change', function () {
+				validImage(false);
+				scope.$apply(function () {
+					ngModel.$render();
+				});
+			});
+			ngModel.$render = function () {
+				ngModel.$setViewValue(elem.val());
+			};
+			function validImage(bool) {
+				ngModel.$setValidity('extension', bool);
+			}
+			ngModel.$parsers.push(function (value) {
+				var ext = value.substr(value.lastIndexOf('.') + 1);
+				if (ext == '') return;
+				if (validFormats.indexOf(ext) == -1) {
+					return value;
+				}
+				validImage(true);
+				return value;
+			});
+		}
+	};
 });
 
 app.directive('autoActive', ['$location', function ($location) {

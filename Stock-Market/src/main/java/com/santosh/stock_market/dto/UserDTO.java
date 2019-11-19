@@ -9,6 +9,8 @@ public class UserDTO {
     private String password;
     private String name;
     private Boolean isAdmin;
+    private String otp;
+    private String newPassword;
 
     public String getEmail() {
         return email;
@@ -36,6 +38,10 @@ public class UserDTO {
 
     public Boolean getAdmin() {
         return isAdmin;
+    }
+
+    public String getOtp() {
+        return otp;
     }
 
     public void setAdmin(Boolean admin) {

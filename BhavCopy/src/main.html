@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Stock Market</title>
+	<title>BearBull Stocks</title>
 	<!-- Tell the browser to be responsive to screen width -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -97,6 +97,28 @@
 		.ng-cloak {
 			display: none;
 		}
+
+		.mh-1{
+			margin: 0px 1px;
+		}
+
+		/* #myModal {
+			position: relative;
+			width: 100%;
+		} */
+
+		/* .modal-dialog {
+			position: fixed;
+			width: 100%;
+			margin: 0;
+			padding: 10px;
+		} */
+
+		/* .myGrid .webix_cell{
+			border-right: 0 none !important;
+		} */
+
+		.text
 	</style>
 </head>
 
@@ -188,20 +210,26 @@
 			<a href="#/dashboard" class="brand-link">
 				<img src="./assets/icons/png/icon.png" alt="Stock Market Logo" class="brand-image img-circle elevation-3"
 					style="opacity: .8">
-				<span class="brand-text font-weight-light">Stock Market</span>
+				<span class="brand-text font-weight-light">BearBull Stocks</span>
 			</a>
 
 			<!-- Sidebar -->
 			<div class="sidebar">
 				<!-- Sidebar user panel (optional) -->
-				<div class="user-panel mt-3 pb-3 mb-3 d-flex">
-					<div class="image">
+				<div class="user-panel mt-2 mb-3 d-flex" ng-class="(logedInUser.isAdmin?'pb-1':'pb-3')">
+					<div class="image align-self-center">
 						<img src="./dist/img/avatar5.png" class="img-circle elevation-2" alt="User Image">
 					</div>
 					<div class="info">
-						<a href="JavaScript:void(0)" class="d-block">Chintan Sheth</a>
+						<div>
+							<a href="JavaScript:void(0)" class="d-block" style="color: white;">{{logedInUser.userName}}</a>
+						</div>
+						<div>
+							<a href="JavaScript:void(0)" class="d-block text-sm" ng-show="logedInUser.isAdmin">Admin</a>
+						</div>
 					</div>
 				</div>
+
 
 				<!-- Sidebar Menu -->
 				<nav class="mt-2">
@@ -210,6 +238,33 @@
 						<!-- Add icons to the links using the .nav-icon class
 									 with font-awesome or any other icon font library -->
 
+						<li class="nav-item has-treeview"
+							ng-class="(isCurrentPath('/dashboard') || isCurrentPath('/scan'))?'menu-open' : ''">
+							<a href="JavaScript:void(0)" class="nav-link"
+								ng-class="(isCurrentPath('/dashboard') || isCurrentPath('/scan'))? 'active' : ''">
+								<i class="nav-icon fas fa-copy"></i>
+								<p>
+									Dashboard
+									<i class="fas fa-angle-left right"></i>
+									<!-- <span class="badge badge-info right">6</span> -->
+								</p>
+							</a>
+							<ul class="nav nav-treeview">
+								<li class="nav-item">
+									<a href="#/dashboard" ng-class="{ active: isCurrentPath('/dashboard') }" class="nav-link linkable">
+										<i class="far fa-circle nav-icon"></i>
+										<p>Record</p>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a href="#/scan" ng-class="{ active: isCurrentPath('/scan') }" class="nav-link linkable">
+										<i class="far fa-circle nav-icon"></i>
+										<p>Scan</p>
+									</a>
+								</li>
+							</ul>
+						</li>
+						<!-- 
 						<li class="nav-item">
 							<a href="#/dashboard" ng-class="{ active: isCurrentPath('/dashboard') }" class="nav-link">
 								<i class="nav-icon fas fa-th"></i>
@@ -217,7 +272,7 @@
 									Dashboard
 								</p>
 							</a>
-						</li>
+						</li> -->
 						<!-- <li class="nav-item has-treeview menu-open">
 							<a href="JavaScript:void(0)" class="nav-link active">
 								<i class="nav-icon fas fa-tachometer-alt"></i>
@@ -242,9 +297,9 @@
 							</ul> -->
 						<!-- </li> -->
 						<li class="nav-item has-treeview"
-							ng-class="(isCurrentPath('/update-data') || isCurrentPath('/change-password') || isCurrentPath('/price-adjustment'))?'menu-open' : ''">
+							ng-class="(isCurrentPath('/update-data') || isCurrentPath('/change-password') || isCurrentPath('/price-adjustment') || isCurrentPath('/change-app-pin'))?'menu-open' : ''">
 							<a href="JavaScript:void(0)" class="nav-link"
-								ng-class="(isCurrentPath('/update-data') || isCurrentPath('/change-password') || isCurrentPath('/price-adjustment'))?'active' : ''">
+								ng-class="(isCurrentPath('/update-data') || isCurrentPath('/change-password') || isCurrentPath('/price-adjustment') || isCurrentPath('/change-app-pin'))?'active' : ''">
 								<i class="nav-icon fas fa-copy"></i>
 								<p>
 									Setting
@@ -267,6 +322,13 @@
 										<p>Change Password</p>
 									</a>
 								</li>
+								<li class="nav-item" ng-show="logedInUser.isAdmin">
+									<a href="#/change-app-pin" ng-class="{ active: isCurrentPath('/change-app-pin') }"
+										class="nav-link linkable">
+										<i class="far fa-circle nav-icon"></i>
+										<p>Change App Pin</p>
+									</a>
+								</li>
 								<li class="nav-item">
 									<a href="#/price-adjustment" ng-class="{ active: isCurrentPath('/price-adjustment') }"
 										class="nav-link linkable">
@@ -277,9 +339,9 @@
 							</ul>
 						</li>
 						<li class="nav-item has-treeview"
-							ng-class="(isCurrentPath('/add-user') || isCurrentPath('/view-user'))?'menu-open' : ''">
+							ng-class="(isCurrentPath('/add-user') || isCurrentPath('/view-user') || isCurrentPathContains('/update-user'))?'menu-open' : ''">
 							<a href="JavaScript:void(0)" class="nav-link"
-								ng-class="(isCurrentPath('/add-user') || isCurrentPath('/view-user'))?'active' : ''">
+								ng-class="(isCurrentPath('/add-user') || isCurrentPath('/view-user') || isCurrentPathContains('/update-user'))?'active' : ''">
 								<i class="nav-icon fas fa-chart-pie"></i>
 								<p>
 									User
@@ -294,7 +356,9 @@
 									</a>
 								</li>
 								<li class="nav-item">
-									<a href="#/view-user" ng-class="{ active: isCurrentPath('/view-user') }" class="nav-link linkable">
+									<a href="#/view-user"
+										ng-class="{ active: isCurrentPath('/view-user') || isCurrentPathContains('/update-user')}"
+										class="nav-link linkable">
 										<i class="far fa-circle nav-icon"></i>
 										<p>View</p>
 									</a>
@@ -302,9 +366,9 @@
 							</ul>
 						</li>
 						<li class="nav-item has-treeview"
-							ng-class="(isCurrentPath('/add-profile') || isCurrentPath('/view-profile'))?'menu-open' : ''">
+							ng-class="(isCurrentPath('/add-profile') || isCurrentPath('/view-profile') || isCurrentPathContains('/update-profile'))?'menu-open' : ''">
 							<a href="JavaScript:void(0)" class="nav-link"
-								ng-class="(isCurrentPath('/add-profile') || isCurrentPath('/view-profile'))?'active' : ''">
+								ng-class="(isCurrentPath('/add-profile') || isCurrentPath('/view-profile') || isCurrentPathContains('/update-profile'))?'active' : ''">
 								<i class="nav-icon fas fa-chart-pie"></i>
 								<p>
 									profile
@@ -320,7 +384,8 @@
 									</a>
 								</li>
 								<li class="nav-item">
-									<a href="#/view-profile" ng-class="{ active: isCurrentPath('/view-profile') }"
+									<a href="#/view-profile"
+										ng-class="{ active: isCurrentPath('/view-profile') ||  isCurrentPathContains('/update-profile') }"
 										class="nav-link linkable">
 										<i class="far fa-circle nav-icon"></i>
 										<p>View</p>
@@ -328,7 +393,7 @@
 								</li>
 							</ul>
 						</li>
-						<li class="nav-item has-treeview" ng-class="(isCurrentPath('/view-scrip'))?'menu-open' : ''">
+						<!-- <li class="nav-item has-treeview" ng-class="(isCurrentPath('/view-scrip'))?'menu-open' : ''">
 							<a href="JavaScript:void(0)" class="nav-link" ng-class="(isCurrentPath('/view-scrip'))?'active' : ''">
 								<i class="nav-icon fas fa-chart-pie"></i>
 								<p>
@@ -344,7 +409,7 @@
 									</a>
 								</li>
 							</ul>
-						</li>
+						</li> -->
 						<li class="nav-item has-treeview" ng-class="(isCurrentPath('/logout'))?'menu-open' : ''">
 							<a href="#/logout" class="nav-link" ng-class="(isCurrentPath('/logout'))?'active' : ''">
 								<i class="nav-icon fas fa-chart-pie"></i>
@@ -372,9 +437,9 @@
 
 		<!-- /.content-wrapper -->
 		<footer class="main-footer ng-cloak text-sm" ng-show="bodyType==2">
-			<strong>Copyright &copy; 2020-2019.</strong>
+			<!-- <strong>Copyright &copy; 2020-2019.</strong>
 			All rights reserved. <strong>Devloped by <a href="https://www.facebook.com/er.santoshrajput"
-					target="_blank">Santosh Dangodara</a>.</strong>
+					target="_blank">Santosh Dangodara</a>.</strong> -->
 			<div class="float-right d-none d-sm-inline-block">
 				<b>Version</b> 1.0.0
 			</div>
@@ -415,8 +480,9 @@
 	<script src="./plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
 	<!-- Summernote -->
 	<script src="./plugins/summernote/summernote-bs4.min.js"></script>
-	
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap4-duallistbox/4.0.1/jquery.bootstrap-duallistbox.min.js"></script>
+
+	<script type="text/javascript"
+		src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap4-duallistbox/4.0.1/jquery.bootstrap-duallistbox.min.js"></script>
 
 
 	<!-- Bootstrap Switch -->
@@ -443,6 +509,7 @@
 
 	<script src="./plugins/angular/angular.min.js"></script>
 	<script src="./plugins/angular/angular-route.min.js"></script>
+	<script src="./plugins/angular/ng-file-upload.min.js"></script>
 
 	<!-- DataTables -->
 	<script src="./plugins/datatables/jquery.dataTables.js"></script>

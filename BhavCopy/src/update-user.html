@@ -5,12 +5,13 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0 text-dark">Add User</h1>
+            <h1 class="m-0 text-dark">Update User</h1>
           </div><!-- /.col -->
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#/dashboard">Home</a></li>
-              <li class="breadcrumb-item active">Add User</li>
+              <li class="breadcrumb-item"><a href="#/view-user">View User</a></li>
+              <li class="breadcrumb-item active">Update User</li>
             </ol>
           </div><!-- /.col -->
         </div><!-- /.row -->
@@ -26,23 +27,23 @@
           <div class="col-md-12">
             <div class="card card-primary">
               <div class="card-header">
-                <h3 class="card-title">Add User</h3>
+                <h3 class="card-title">Update User</h3>
               </div>
               <!-- /.card-header -->
               <!-- form start -->
-              <form name="addUserForm" ng-submit="addUser()" novalidate>
+              <form name="updateUserForm" ng-submit="updateUser()" novalidate>
                 <div class="card-body">
                   <div class="col-md-8 offset-md-2 align-self-center">
                     <div class="form-group row">
                       <label for="inputEmail3" class="col-md-3 col-form-label">Name</label>
                       <div class="col-md-9">
                           <input type="text" class="form-control" name="name" ng-model="formData.name" placeholder="Full name" 
-                          ng-class="(addUserForm.name.$dirty || addUserForm.name.$touched)?((addUserForm.name.$invalid)?1:2):0|validationClass" allow-letters-and-space-only ng-pattern="/^[a-zA-Z][a-zA-Z0-9\s]*$/" ng-required="true">
+                          ng-class="(updateUserForm.name.$dirty || updateUserForm.name.$touched)?((updateUserForm.name.$invalid)?1:2):0|validationClass" allow-letters-and-space-only ng-pattern="/^[a-zA-Z][a-zA-Z0-9\s]*$/" ng-required="true">
                           <div class="invalid-feedback"
-                            ng-show="(addUserForm.name.$dirty || addUserForm.name.$touched)  && addUserForm.name.$error.required">
+                            ng-show="(updateUserForm.name.$dirty || updateUserForm.name.$touched)  && updateUserForm.name.$error.required">
                             Name can not be empty.</div>
                           <div class="invalid-feedback"
-                            ng-show="(addUserForm.name.$dirty || addUserForm.name.$touched) && addUserForm.name.$error.pattern">
+                            ng-show="(updateUserForm.name.$dirty || updateUserForm.name.$touched) && updateUserForm.name.$error.pattern">
                             Name can not contain invalid characters.</div>
                         </div>
                     </div>
@@ -51,13 +52,13 @@
                       <div class="col-md-9">
                         <input type="email" name="email" ng-model="formData.email" class="form-control"
                           placeholder="Email" ng-required="true"
-                          ng-class="(addUserForm.email.$dirty || addUserForm.email.$touched)?((addUserForm.email.$invalid)?1:2):0|validationClass">
+                          ng-class="(updateUserForm.email.$dirty || updateUserForm.email.$touched)?((updateUserForm.email.$invalid)?1:2):0|validationClass">
                         <div class="invalid-feedback"
-                          ng-show="(addUserForm.email.$dirty || addUserForm.email.$touched) && addUserForm.email.$error.required">
+                          ng-show="(updateUserForm.email.$dirty || updateUserForm.email.$touched) && updateUserForm.email.$error.required">
                           Email can
                           not be empty.</div>
                         <div class="invalid-feedback"
-                          ng-show="(addUserForm.email.$dirty || addUserForm.email.$touched) && addUserForm.email.$error.email">
+                          ng-show="(updateUserForm.email.$dirty || updateUserForm.email.$touched) && updateUserForm.email.$error.email">
                           Please enter
                           valid email id.</div>
                       </div>
@@ -68,15 +69,15 @@
                         <input type="password" name="password" ng-model="formData.password" class="form-control"
                           placeholder="New Password" ng-required="true" ng-pattern="/^[a-zA-Z0-9$@$!%*#?&]*$/"
                           ng-minLength="6"
-                          ng-class="(addUserForm.password.$dirty || addUserForm.password.$touched)?((addUserForm.password.$invalid)?1:2):0|validationClass">
+                          ng-class="(updateUserForm.password.$dirty || updateUserForm.password.$touched)?((updateUserForm.password.$invalid)?1:2):0|validationClass">
                         <div class="invalid-feedback"
-                          ng-show="(addUserForm.password.$dirty || addUserForm.password.$touched)  && addUserForm.password.$error.required">
+                          ng-show="(updateUserForm.password.$dirty || updateUserForm.password.$touched)  && updateUserForm.password.$error.required">
                           Password can not be empty.</div>
                         <div class="invalid-feedback"
-                          ng-show="(addUserForm.password.$dirty || addUserForm.password.$touched)  && addUserForm.password.$error.minlength">
+                          ng-show="(updateUserForm.password.$dirty || updateUserForm.password.$touched)  && updateUserForm.password.$error.minlength">
                           Password should be atleast 6 character long.</div>
                         <div class="invalid-feedback"
-                          ng-show="(addUserForm.password.$dirty || addUserForm.password.$touched) && addUserForm.password.$error.pattern">
+                          ng-show="(updateUserForm.password.$dirty || updateUserForm.password.$touched) && updateUserForm.password.$error.pattern">
                           Password can not contain invalid characters.</div>
                       </div>
                     </div>
@@ -85,12 +86,12 @@
                       <div class="col-md-9"><input type="password" name="confirmPassword"
                           ng-model="formData.confirmPassword" class="form-control" placeholder="Confirm Password"
                           ng-required="true" compare-to="formData.password"
-                          ng-class="(addUserForm.confirmPassword.$dirty || addUserForm.confirmPassword.$touched)?((addUserForm.confirmPassword.$invalid)?1:2):0|validationClass">
+                          ng-class="(updateUserForm.confirmPassword.$dirty || updateUserForm.confirmPassword.$touched)?((updateUserForm.confirmPassword.$invalid)?1:2):0|validationClass">
                         <div class="invalid-feedback"
-                          ng-show="(addUserForm.confirmPassword.$dirty || addUserForm.confirmPassword.$touched)  && addUserForm.confirmPassword.$error.required">
+                          ng-show="(updateUserForm.confirmPassword.$dirty || updateUserForm.confirmPassword.$touched)  && updateUserForm.confirmPassword.$error.required">
                           Confirm password can not be empty.</div>
                         <div class="invalid-feedback"
-                          ng-show="(addUserForm.confirmPassword.$dirty || addUserForm.confirmPassword.$touched) && addUserForm.confirmPassword.$error.compareTo">
+                          ng-show="(updateUserForm.confirmPassword.$dirty || updateUserForm.confirmPassword.$touched) && updateUserForm.confirmPassword.$error.compareTo">
                           Confirm password does not match.</div>
                       </div>
                     </div>
@@ -113,8 +114,8 @@
                 <div class="card-footer">
                   <div class="row justify-content-end">
                       <button type="submit" class="btn btn-primary"
-                        ng-disabled="(addUserForm.$pristine || addUserForm.$invalid) || disabledAddUserButtonElement"
-                        ng-bind-html="addUserButtonElement">Add New User</button>
+                        ng-disabled="(updateUserForm.$pristine || updateUserForm.$invalid) || disabledUpdateUserButtonElement"
+                        ng-bind-html="updateUserButtonElement">Update User</button>
                   </div>
                 </div>
               </form>

@@ -49,7 +49,7 @@ public class JWTRequestFilter extends OncePerRequestFilter {
 
         // Once we get the token validate it.
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            User user = this.jwtUserDetailsService.getUserByEmail(email);
+            User user = this.jwtUserDetailsService.findByEmail(email);
             UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(email);
 
             // if token is valid configure Spring Security to manually set authentication

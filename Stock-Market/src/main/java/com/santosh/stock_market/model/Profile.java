@@ -2,13 +2,15 @@ package com.santosh.stock_market.model;
 
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "profiles")
-public class Profile {
+public class Profile implements Serializable{
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,10 +20,19 @@ public class Profile {
   @Column(unique = true, nullable = false)
   private String name;
 
-  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
   @JoinTable(name="profile_scrips", joinColumns={@JoinColumn(referencedColumnName="id")}
       , inverseJoinColumns={@JoinColumn(referencedColumnName="id")})
   private Set<Scrip> scrips=new HashSet<>();
+
+  public Profile(String name, Set<Scrip> scrips){
+    this.name = name;
+    this.scrips =scrips;
+  }
+
+  public Profile() {
+    super();
+  }
 
   public Set<Scrip> getScrips() {
     return scrips;

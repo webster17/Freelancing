@@ -5,12 +5,13 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0 text-dark">Add Profile</h1>
+          <h1 class="m-0 text-dark">Update Profile</h1>
         </div><!-- /.col -->
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="#/dashboard">Home</a></li>
-            <li class="breadcrumb-item active">Add Profile</li>
+            <li class="breadcrumb-item"><a href="#/view-profile">View Profile</a></li>
+            <li class="breadcrumb-item active">Update Profile</li>
           </ol>
         </div><!-- /.col -->
       </div><!-- /.row -->
@@ -26,11 +27,11 @@
         <div class="col-md-12">
           <div class="card card-primary">
             <div class="card-header">
-              <h3 class="card-title">New Profile</h3>
+              <h3 class="card-title">Update Profile</h3>
             </div>
             <!-- /.card-header -->
             <!-- form start -->
-            <form name="addProfileForm" ng-submit="addProfile()" novalidate>
+            <form name="updateProfileForm" ng-submit="updateProfile()" novalidate>
               <div class="card-body">
                 <div class="col-md-8 offset-md-2 align-self-center">
                   <div class="form-group row mb-4">
@@ -38,12 +39,12 @@
                     <div class="col-md-9">
                       <input type="text" name="name" ng-model="formData.name" class="form-control" placeholder="Name"
                         ng-required="true" ng-pattern="/^[a-zA-Z0-9$@$!%*#?&\s]*$/"
-                        ng-class="(addProfileForm.name.$dirty || addProfileForm.name.$touched)?((addProfileForm.name.$invalid)?1:2):0|validationClass">
+                        ng-class="(updateProfileForm.name.$dirty || updateProfileForm.name.$touched)?((updateProfileForm.name.$invalid)?1:2):0|validationClass">
                       <div class="invalid-feedback"
-                        ng-show="(addProfileForm.name.$dirty || addProfileForm.name.$touched)  && addProfileForm.name.$error.required">
+                        ng-show="(updateProfileForm.name.$dirty || updateProfileForm.name.$touched)  && updateProfileForm.name.$error.required">
                         Profile name can not be empty.</div>
                       <div class="invalid-feedback"
-                        ng-show="(addProfileForm.name.$dirty || addProfileForm.name.$touched) && addProfileForm.name.$error.pattern">
+                        ng-show="(updateProfileForm.name.$dirty || updateProfileForm.name.$touched) && updateProfileForm.name.$error.pattern">
                         Profile name can not contain invalid characters.</div>
                     </div>
                   </div>
@@ -53,11 +54,10 @@
                       <select class="form-control select2" ng-model="formData.scripIds" name="scripIds"
                         style="width: 100%;" multiple="multiple" size="10" ng-required="true">
                         <option value="" disabled selected>Select scrips</option>
-                        <option ng-repeat="scrip in scrips " value="{{ scrip.id }}">{{ scrip.name }}</option>
+                        <option ng-repeat="scrip in scrips | limitTo:100" value="{{ scrip.id }}">{{ scrip.name }}</option>
                       </select>
-                      <!-- | limitTo:100 -->
                       <div class="invalid-feedback"
-                        ng-show="(addProfileForm.scripIds.$dirty || addProfileForm.scripIds.$touched)  && addProfileForm.scripIds.$error.required">
+                        ng-show="(updateProfileForm.scripIds.$dirty || updateProfileForm.scripIds.$touched)  && updateProfileForm.scripIds.$error.required">
                         Select any one scrip.</div>
                     </div>
                   </div>
@@ -74,8 +74,8 @@
               <div class="card-footer">
                 <div class="row justify-content-end">
                   <button type="submit" class="btn btn-primary"
-                    ng-disabled="(addProfileForm.$pristine || addProfileForm.$invalid) || disabledAddProfileButtonElement"
-                    ng-bind-html="addProfileButtonElement">Add New Profile</button>
+                    ng-disabled="(updateProfileForm.$pristine || updateProfileForm.$invalid) || disabledUpdateProfileButtonElement"
+                    ng-bind-html="updateProfileButtonElement">Update Profile</button>
                 </div>
               </div>
             </form>

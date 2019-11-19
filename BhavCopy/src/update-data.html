@@ -30,27 +30,44 @@
             </div>
             <!-- /.card-header -->
             <!-- form start -->
-            <form role="form">
+            <form ng-submit="updateData()" name="updateDataForm" novalidate>
               <div class="card-body">
                 <div class="col-md-6 offset-md-3 align-self-center">
-                    <div class="form-group row">
-                    <label for="inputEmail3" class="col-md-3 col-form-label">File Input </label>
+                  <div class="form-group row ">
+                    <label for="inputEmail3" class="col-md-3 col-form-label">File Input</label>
                     <div class="col-md-9">
-                        <div class="input-group">
-                          <div class="custom-file">
-                            <input type="file" class="custom-file-input" id="exampleInputFile">
-                            <label class="custom-file-label" for="exampleInputFile">Choose file</label>
-                          </div>
+                      <div class="input-group">
+                        <div class="custom-file">
+                          <input type="file" class="custom-file-input" id="dataFile" ng-model="fileName"
+                            ngf-select="selectFile($file)" name="dataFile"
+                            ng-class="(updateDataForm.dataFile.$dirty || updateDataForm.dataFile.$touched)?((updateDataForm.dataFile.$invalid)?1:2):0|validationClass"
+                            valid-file ng-required="true" >
+                          <label class="custom-file-label" for="dataFile">{{ (fileName == "")?"Choose File":fileName }}
+                          </label>
                         </div>
+                        <div class="invalid-feedback" style="display: block;"
+                          ng-show="(updateDataForm.dataFile.$dirty || updateDataForm.dataFile.$touched) && updateDataForm.dataFile.$error.required">
+                          Please select file first.</div>
+                        <div class="invalid-feedback" style="display: block;"
+                          ng-show="(updateDataForm.dataFile.$dirty || updateDataForm.dataFile.$touched)  && updateDataForm.dataFile.$error.extension">
+                          Selected file extension is not valid.</div>
                       </div>
                     </div>
+                  </div>
+                  <div class="row">
+                      <div class="offset-md-3 col-md-9 text-center mt-2">
+                        <p ng-class="formFeedback.class" style="margin: 0px;">{{ formFeedback.message }}</p>
+                      </div>
+                  </div>
                 </div>
               </div>
               <!-- /.card-body -->
 
               <div class="card-footer">
                 <div class="row justify-content-end">
-                    <button type="submit" class="btn btn-primary">Update Data</button>
+                  <button type="submit" class="btn btn-primary"
+                    ng-disabled="(updateDataForm.$pristine || updateDataForm.$invalid) || disabledUpdateDataButtonElement"
+                    ng-bind-html="updateDataButtonElement">Update Data</button>
                 </div>
               </div>
             </form>

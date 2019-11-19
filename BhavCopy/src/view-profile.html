@@ -32,7 +32,6 @@
                 <tr>
                   <th>No.</th>
                   <th>Name</th>
-                  <th>Description</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -40,12 +39,11 @@
                 <tr ng-repeat="profile in profiles">
                   <td>{{ profile.id }}</td>
                   <td>{{ profile.name }}</td>
-                  <td>{{ profile.description }}</td>
                   <td>
-                    <a class='btn mr-2 btn-outline-primary btn-sm update' ng-href="{{'#/update/'+profile.id}}">
+                    <a class='btn mr-2 btn-outline-primary btn-sm update' ng-href="{{'#/update-profile/'+profile.id}}">
                       <i class='fa fa-edit' aria-hidden="true"></i>
                     </a>
-                    <button class='btn btn-outline-danger btn-sm delete' ng-click="deleteStudent(profile.id)"
+                    <button class='btn btn-outline-danger btn-sm delete' ng-click="deleteProfile(profile.id)"
                       ng-disabled="deleteDisabledButtonElement">
                       <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
