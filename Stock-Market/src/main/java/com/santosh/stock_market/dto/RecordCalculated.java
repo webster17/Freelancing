@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.santosh.stock_market.utility.MoveType;
 import com.santosh.stock_market.utility.State;
+import com.santosh.stock_market.utility.config.ColourState;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
@@ -16,19 +17,43 @@ public class RecordCalculated implements Serializable {
 
   private static DecimalFormat df = new DecimalFormat("0.00");
   public State state, closeState;
-  public MoveType recordState;
   public MoveType moveType;
+  public String moveColour;
   private Long id;
   private String scripName;
-  private Float high, low, range, open, close, last, previousClose, previousRange;
+  private Float high;
+  private Float low;
+  private Float range;
+  private Float open;
+  private boolean selected=false;
+
+  public String getSelected() {
+    if(selected && state==State.UP)
+      return "high";
+    else if(selected && state==State.DOWN)
+      return "low";
+    else
+      return "-";
+  }
+
+  public void setSelected(boolean selected) {
+    this.selected = selected;
+  }
+
+  private Float close, previousClose;
+  private Float last;
+  private Float previousRange;
+  private MovingAverage sma, ema39, ema61;
+  private String gap;
   private Long totalTradeQuantity, totalTrades;
   private Double totalTradeValue;
-  private String highLowArrow, highLowArrowColour;
+  private String highLowArrow;
+  private ColourState highLowArrowColour;
   @JsonFormat(pattern = "dd-MM-yyyy")
   private Date date;
   private List<Range> rangeList;
 
-  public RecordCalculated(Long id, String scripName, Float high, Float low, Float open, Float close, Float last, Float previousClose, Long totalTradeQuantity, Long totalTrades, Double totalTradeValue, Date date) {
+  public RecordCalculated(Long id, String scripName, Float high, Float low, Float open, Float close, Float last, Long totalTradeQuantity, Long totalTrades, Double totalTradeValue, Float smaValue, Float ema39Value, Float ema61Value, Date date) {
     this.id = id;
     this.scripName = scripName;
     this.high = Math.round(high * 100) / 100F;
@@ -36,7 +61,6 @@ public class RecordCalculated implements Serializable {
     this.open = Math.round(open * 100) / 100F;
     this.close = Math.round(close * 100) / 100F;
     this.last = Math.round(last * 100) / 100F;
-    this.previousClose = Math.round(previousClose * 100) / 100F;
     this.totalTradeQuantity = totalTradeQuantity;
     this.totalTrades = totalTrades;
     this.totalTradeValue = Math.round(totalTradeValue * 100) / 100.0;
@@ -44,15 +68,46 @@ public class RecordCalculated implements Serializable {
     this.range = Math.round((high - low) * 100) / 100F;
     rangeList = new ArrayList<>();
     this.state = State.NONE;
-    this.recordState = MoveType.BLANK;
+    this.moveType = MoveType.BLANK;
 
+    if (smaValue != null) {
+      float value = Math.round(smaValue * 100) / 100F;
+      String smaColour = "-";
+      if (this.close > value)
+        smaColour = "green";
+      else if (this.close < value)
+        smaColour = "red";
+      else
+        smaColour = "grey";
+      this.sma = new MovingAverage(value, smaColour);
+    }
+    if (ema39Value != null) {
+      float value = Math.round(ema39Value * 100) / 100F;
+      String emaColour = "-";
+      if (this.close > value)
+        emaColour = "green";
+      else if (this.close < value)
+        emaColour = "red";
+      else
+        emaColour = "grey";
+      this.ema39 = new MovingAverage(value, emaColour);
+    }
+    if (ema61Value != null) {
+      float value = Math.round(ema61Value * 100) / 100F;
+      String emaColour = "-";
+      if (this.close > value)
+        emaColour = "green";
+      else if (this.close < value)
+        emaColour = "red";
+      else
+        emaColour = "grey";
+      this.ema61 = new MovingAverage(value, emaColour);
+    }
 
-    if (close > previousClose)
-      closeState = State.UP;
-    else if (close < previousClose)
-      closeState = State.DOWN;
-    else
-      closeState = State.NONE;
+  }
+
+  public MovingAverage getSma() {
+    return sma;
   }
 
   public Float getPreviousRange() {
@@ -71,11 +126,35 @@ public class RecordCalculated implements Serializable {
     return rangeList;
   }
 
+  public String getGap() {
+    return gap;
+  }
+
+  public MovingAverage getEma39() {
+    return ema39;
+  }
+
+  public MovingAverage getEma61() {
+    return ema61;
+  }
+
   public void calculateHighLowArrow(RecordCalculated previousDayRecord, RecordCalculated mostRecentUpOrDownRecord) {
 
-    highLowArrow= "-";
+    highLowArrow = "-";
+    gap = "-";
+    closeState=State.NONE;
+    previousClose = 0.0F;
 
     if (previousDayRecord != null) {
+
+      if (close > previousDayRecord.getClose())
+        closeState = State.UP;
+      else if (close < previousDayRecord.getClose())
+        closeState = State.DOWN;
+      else
+        closeState = State.NONE;
+
+      previousClose = previousDayRecord.getClose();
 
       Range range1180 = new Range(11.80F, previousDayRecord.getRange(), previousDayRecord.getClose());
       Range range2360 = new Range(23.60F, previousDayRecord.getRange(), previousDayRecord.getClose());
@@ -95,7 +174,7 @@ public class RecordCalculated implements Serializable {
       range12720.calculateHigherAndLowerTradedValue(previousDayRecord.getClose(), range100, range16180);
       range16180.calculateHigherAndLowerTradedValue(previousDayRecord.getClose(), range12720, range26180);
       range26180.calculateHigherAndLowerTradedValue(previousDayRecord.getClose(), range16180, range42360);
-      range42360.calculateHigherAndLowerTradedValue(previousDayRecord.getClose(), null, null);
+      range42360.calculateHigherAndLowerTradedValue(previousDayRecord.getClose(), range26180, null);
 
       rangeList.add(range1180);
       rangeList.add(range2360);
@@ -107,6 +186,47 @@ public class RecordCalculated implements Serializable {
       rangeList.add(range26180);
       rangeList.add(range42360);
 
+      if (sma != null) {
+        sma.setPosition(getPlottingPosition(sma.getValue(), State.UP), getPlottingPosition(sma.getValue(), State.DOWN));
+      }
+
+      if (previousDayRecord.getEma39() != null) {
+        float value = Math.round(((close - previousDayRecord.getEma39().getValue()) * (2.0F / (39 + 1)) + previousDayRecord.getEma39().getValue()) * 100) / 100F;
+        String emaColour = "-";
+        if (this.close > value)
+          emaColour = "green";
+        else if (this.close < value)
+          emaColour = "red";
+        else
+          emaColour = "grey";
+        this.ema39 = new MovingAverage(value, emaColour);
+      }
+
+      if (previousDayRecord.getEma61() != null) {
+        float value = Math.round(((close - previousDayRecord.getEma61().getValue()) * (2.0F / (61 + 1)) + previousDayRecord.getEma61().getValue()) * 100) / 100F;
+        String emaColour = "-";
+        if (this.close > value)
+          emaColour = "green";
+        else if (this.close < value)
+          emaColour = "red";
+        else
+          emaColour = "grey";
+        this.ema61 = new MovingAverage(value, emaColour);
+      }
+
+      if (ema39 != null) {
+        ema39.setPosition(getPlottingPosition(ema39.getValue(), State.UP), getPlottingPosition(ema39.getValue(), State.DOWN));
+      }
+      if (ema61 != null) {
+        ema61.setPosition(getPlottingPosition(ema61.getValue(), State.UP), getPlottingPosition(ema61.getValue(), State.DOWN));
+      }
+
+      if (low > previousDayRecord.getHigh()) {
+        gap = "High";
+      } else if (high < previousDayRecord.getLow()) {
+        gap = "low";
+      }
+
       if (this.close > previousDayRecord.getHigh()) {
         state = State.UP;
         highLowArrow = "Up";
@@ -115,69 +235,92 @@ public class RecordCalculated implements Serializable {
         highLowArrow = "Down";
       } else if (mostRecentUpOrDownRecord != null) {
         if (mostRecentUpOrDownRecord.state == State.UP) {
-          if (high > previousDayRecord.getHigh() && low > previousDayRecord.getLow()) {
+          if (high >= previousDayRecord.getHigh() && low >= previousDayRecord.getLow()) {
             state = State.UP;
             highLowArrow = "Up";
           } else if (this.high <= previousDayRecord.getHigh() && this.low <= previousDayRecord.getLow() && this.close >= previousDayRecord.getLow()) {
             state = State.UP;
             highLowArrow = "N-";
-          } else if (this.high < previousDayRecord.getHigh() && this.low > previousDayRecord.getLow() ) {
+          } else if (this.high < previousDayRecord.getHigh() && this.low > previousDayRecord.getLow()) {
             state = State.UP;
 //            && closeState == previousDayRecord.closeState
             highLowArrow = "|";
           } else if (this.high > previousDayRecord.getHigh() && this.low < previousDayRecord.getLow() && this.close > previousDayRecord.getLow()) {
             state = State.UP;
             highLowArrow = "N-Up";
-          }else {
+          } else {
             state = State.NONE;
-            highLowArrow="-";
+            highLowArrow = "-";
           }
         } else {
-          if(high < previousDayRecord.getHigh() && low < previousDayRecord.getLow()){
+          if (high <= previousDayRecord.getHigh() && low <= previousDayRecord.getLow()) {
             state = State.DOWN;
             highLowArrow = "Down";
-          }
-          else if (high < previousDayRecord.getHigh() && low > previousDayRecord.getLow()) {
-            state = State.DOWN;
-            highLowArrow = "|";
           } else if (this.low >= previousDayRecord.getLow() && this.high >= previousDayRecord.getHigh() && this.close <= previousDayRecord.getHigh()) {
             state = State.DOWN;
             highLowArrow = "-N";
+          } else if (high < previousDayRecord.getHigh() && low > previousDayRecord.getLow()) {
+            state = State.DOWN;
+            highLowArrow = "|";
           } else if (this.low < previousDayRecord.getLow() && this.high > previousDayRecord.getHigh() && this.close < previousDayRecord.getHigh()) {
             state = State.DOWN;
             highLowArrow = "-NDown";
           } else {
             state = State.NONE;
-            highLowArrow="-";{
+            highLowArrow = "-";
+            {
               state = State.NONE;
               highLowArrow = "-";
             }
           }
         }
       }
-    } else
-
-    System.out.println(highLowArrow);
+    }
   }
 
-  public void calculateHighLowArrowColour(Range selectedRange, String previousRecordColour) {
-    float selectedValue = 0F;
-    if (state == State.UP) {
-      if (selectedRange != null && selectedRange.getRisingChannel().getHigherTradedValue() != null)
-        selectedValue = selectedRange.getRisingChannel().getHigherTradedValue();
-      if (high > selectedValue)
-        this.highLowArrowColour = "darkgreen";
-      else
-        this.highLowArrowColour = "lightgreen";
-    } else if (state == State.DOWN) {
-      if (selectedRange != null && selectedRange.getFallingChannel().getLowerTradedValue() != null)
-        selectedValue = selectedRange.getFallingChannel().getLowerTradedValue();
-      if (low > selectedValue)
-        this.highLowArrowColour = "red";
-      else
-        this.highLowArrowColour = "darkred";
+  public void calculateHighLowArrowColour(Range firstRange, Range secondRange, List<RecordCalculated> recordCalculatedList) {
+    if (this.state == State.NONE) {
+      this.highLowArrowColour = ColourState.GREY;
+    } else if (firstRange != null && secondRange != null) {
+      boolean isDarkColourEncountered = false;
+      for (RecordCalculated recordCalculated : recordCalculatedList) {
+        if (state == State.DOWN && recordCalculated.highLowArrowColour == ColourState.DARK_RED)
+          isDarkColourEncountered = true;
+        else if (state == State.UP && recordCalculated.highLowArrowColour == ColourState.DARK_GREEN)
+          isDarkColourEncountered = true;
+      }
+      if (isDarkColourEncountered) {
+        if (state == State.DOWN)
+          this.highLowArrowColour = ColourState.DARK_RED;
+        else
+          this.highLowArrowColour = ColourState.DARK_GREEN;
+      } else {
+        if (state == State.UP && firstRange.getRisingChannel().getHigherTradedValue() != null && secondRange.getRisingChannel().getHigherTradedValue() != null) {
+          if (high > firstRange.getRisingChannel().getHigherTradedValue() && high > secondRange.getRisingChannel().getHigherTradedValue()) {
+            this.highLowArrowColour = ColourState.DARK_GREEN;
+          } else {
+            this.highLowArrowColour = ColourState.LIGHT_GREEN;
+          }
+        } else if (state == State.DOWN && firstRange.getFallingChannel().getLowerTradedValue() != null && secondRange.getFallingChannel().getLowerTradedValue() != null) {
+          if (low < firstRange.getFallingChannel().getLowerTradedValue() && low < secondRange.getFallingChannel().getLowerTradedValue()) {
+            this.highLowArrowColour = ColourState.DARK_RED;
+          } else {
+            this.highLowArrowColour = ColourState.LIGHT_RED;
+          }
+        } else {
+          if (this.state == State.UP)
+            this.highLowArrowColour = ColourState.LIGHT_GREEN;
+          else
+            this.highLowArrowColour = ColourState.LIGHT_RED;
+        }
+      }
     } else {
-      this.highLowArrowColour = previousRecordColour;
+      if (this.state == State.UP)
+        this.highLowArrowColour = ColourState.LIGHT_GREEN;
+      else if (this.state == State.DOWN)
+        this.highLowArrowColour = ColourState.LIGHT_RED;
+      else
+        this.highLowArrowColour = ColourState.GREY;
     }
   }
 
@@ -205,76 +348,122 @@ public class RecordCalculated implements Serializable {
     this.high = high;
   }
 
-  public Range getTradedValue(float comparableValue, State state, int level) {
-    int selectedRangeList = -1;
-    if (state == State.UP) {
-      for (int i = 0; i < rangeList.size(); i++) {
-        if (i == 0) {
-          if (rangeList.get(i).getRisingChannel().getTradedValue() > comparableValue) {
-            selectedRangeList = i;
-            break;
-          }
-        } else if (rangeList.get(i - 1).getRisingChannel().getTradedValue() <= comparableValue && rangeList.get(i).getRisingChannel().getTradedValue() > comparableValue) {
-          selectedRangeList = i + level;
-          break;
-        } else if (i == rangeList.size() - 1) {
-          if (rangeList.get(i).getRisingChannel().getTradedValue() <= comparableValue) {
-            selectedRangeList = i + level;
-            break;
-          }
-        }
-      }
-    } else if (state == State.DOWN) {
-      for (int i = 0; i < rangeList.size(); i++) {
-        if (i == 0) {
-          if (rangeList.get(i).getFallingChannel().getTradedValue() < comparableValue) {
-            selectedRangeList = i;
-            break;
-          }
-        } else if (rangeList.get(i - 1).getFallingChannel().getTradedValue() >= comparableValue && rangeList.get(i).getFallingChannel().getTradedValue() < comparableValue) {
-          selectedRangeList = i + level;
-          break;
-        } else if (i == rangeList.size() - 1) {
-          if (rangeList.get(i).getFallingChannel().getTradedValue() >= comparableValue) {
-            selectedRangeList = i + level;
-            break;
-          }
-        }
-      }
-    }
+  public Range getTradedValue(float comparableValue, State channelState, int level) {
+
+    int selectedRangeList = getPlottingPosition(comparableValue, channelState);
+//
+//    int selectedRangeList = -1;
+//    if (state == State.UP) {
+//      for (int i = 0; i < rangeList.size(); i++) {
+//        if (i == 0) {
+//          if (rangeList.get(i).getRisingChannel().getTradedValue() > comparableValue) {
+//            selectedRangeList = i;
+//            break;
+//          }
+//        } else if (i == rangeList.size() - 1) {
+//          if (rangeList.get(i).getRisingChannel().getTradedValue() <= comparableValue) {
+//            selectedRangeList = i;
+//            break;
+//          }
+//        } else if (rangeList.get(i - 1).getRisingChannel().getTradedValue() <= comparableValue && rangeList.get(i).getRisingChannel().getTradedValue() > comparableValue) {
+//          selectedRangeList = i;
+//          break;
+//        }
+//      }
+//    } else if (state == State.DOWN) {
+//      for (int i = 0; i < rangeList.size(); i++) {
+//        if (i == 0) {
+//          if (rangeList.get(i).getFallingChannel().getTradedValue() < comparableValue) {
+//            selectedRangeList = i;
+//            break;
+//          }
+//        } else if (i == rangeList.size() - 1) {
+//          if (rangeList.get(i).getFallingChannel().getTradedValue() >= comparableValue) {
+//            selectedRangeList = i;
+//            break;
+//          }
+//        } else if (rangeList.get(i - 1).getFallingChannel().getTradedValue() >= comparableValue && rangeList.get(i).getFallingChannel().getTradedValue() < comparableValue) {
+//          selectedRangeList = i;
+//          break;
+//        }
+//      }
+//    }
 
     if (selectedRangeList != -1 && selectedRangeList < 2) {
       selectedRangeList = 2;
     }
 
-    if (selectedRangeList > -1 && selectedRangeList < rangeList.size()) {
+    if (selectedRangeList >= 0 && selectedRangeList < rangeList.size()) {
       selectedRangeList = selectedRangeList + level;
     }
 
-    if (selectedRangeList > -1 && selectedRangeList < rangeList.size())
+    if (selectedRangeList >= 0 && selectedRangeList < rangeList.size())
       return rangeList.get(selectedRangeList);
     return null;
   }
 
+  public int getPlottingPosition(float comparableValue, State channelState) {
+    if (channelState == State.UP) {
+      for (int i = 0; i < rangeList.size(); i++) {
+        if (i == 0) {
+          if (comparableValue < rangeList.get(i).getRisingChannel().getTradedValue())
+            return i;
+        } else if (comparableValue >= rangeList.get(i - 1).getRisingChannel().getTradedValue() && comparableValue < rangeList.get(i).getRisingChannel().getTradedValue())
+          return i;
+        else if (i == rangeList.size() - 1 && comparableValue >= rangeList.get(i).getRisingChannel().getTradedValue())
+          return i + 1;
+      }
+    } else if (channelState == State.DOWN) {
+      for (int i = 0; i < rangeList.size(); i++) {
+        if (i == 0) {
+          if (comparableValue > rangeList.get(i).getFallingChannel().getTradedValue())
+            return i;
+        } else if (comparableValue <= rangeList.get(i - 1).getFallingChannel().getTradedValue() && comparableValue > rangeList.get(i).getFallingChannel().getTradedValue())
+          return i;
+        else if (i == rangeList.size() - 1 && comparableValue <= rangeList.get(i).getFallingChannel().getTradedValue())
+          return i + 1;
+      }
+    }
+
+    return -1;
+  }
+
   public String getMoveType() {
     if (moveType == MoveType.JUSTIFIED_STRONG_DOWN)
-      return "Justified Strong Down";
+      return "J Strong Down";
     else if (moveType == MoveType.JUSTIFIED_STRONG_UP)
-      return "Justified Strong Up";
-    else if (moveType == MoveType.STRONG_DOWN)
-      return "Strong Down";
+      return "J Strong Up";
     else if (moveType == MoveType.STRONG_UP)
       return "Strong Up";
-    else if (moveType == MoveType.WEAK_DOWN)
-      return "Weak Down";
+    else if (moveType == MoveType.STRONG_DOWN)
+      return "Strong Down";
     else if (moveType == MoveType.WEAK_UP)
       return "Weak Up";
+    else if (moveType == MoveType.WEAK_DOWN)
+      return "Weak Down";
+    else if (moveType == MoveType.FALSE_UP)
+      return "False Up";
+    else if (moveType == MoveType.FALSE_DOWN)
+      return "False Down";
     else
       return "-";
   }
 
   public void setMoveType(MoveType moveType) {
     this.moveType = moveType;
+  }
+
+  public String getMoveColour() {
+    if (moveType == MoveType.JUSTIFIED_STRONG_DOWN)
+      return "#b20000";
+    else if (moveType == MoveType.JUSTIFIED_STRONG_UP)
+      return "#006600";
+    else if (moveType == MoveType.STRONG_UP)
+      return "#00b200";
+    else if (moveType == MoveType.STRONG_DOWN)
+      return "#ff3232";
+    else
+      return "grey";
   }
 
   public Float getLow() {
@@ -307,14 +496,6 @@ public class RecordCalculated implements Serializable {
 
   public void setLast(Float last) {
     this.last = last;
-  }
-
-  public Float getPreviousClose() {
-    return previousClose;
-  }
-
-  public void setPreviousClose(Float previousClose) {
-    this.previousClose = previousClose;
   }
 
   public Long getTotalTradeQuantity() {
@@ -350,7 +531,16 @@ public class RecordCalculated implements Serializable {
   }
 
   public String getHighLowArrowColour() {
-    return highLowArrowColour;
+    if (highLowArrowColour == ColourState.LIGHT_GREEN)
+      return "lightgreen";
+    else if (highLowArrowColour == ColourState.LIGHT_RED)
+      return "#ff7f7f";
+    else if (highLowArrowColour == ColourState.DARK_RED)
+      return "#dc3545";
+    else if (highLowArrowColour == ColourState.DARK_GREEN)
+      return "#28a745";
+    else
+      return "grey";
   }
 
   public Date getDate() {
@@ -361,112 +551,108 @@ public class RecordCalculated implements Serializable {
     this.date = date;
   }
 
-  public String getRecordState() {
-    if (recordState == MoveType.JUSTIFIED_STRONG_DOWN)
-      return "JSD";
-    else if (recordState == MoveType.JUSTIFIED_STRONG_UP)
-      return "JSU";
-    else if (recordState == MoveType.STRONG_UP)
-      return "SU";
-    else if (recordState == MoveType.STRONG_DOWN)
-      return "SD";
-    else if (recordState == MoveType.WEAK_UP)
-      return "WU";
-    else if (recordState == MoveType.WEAK_DOWN)
-      return "WD";
-    else if (recordState == MoveType.FALSE_UP)
-      return "FU";
-    else if (recordState == MoveType.FALSE_DOWN)
-      return "FD";
+  public String getCloseState() {
+    if(closeState == State.UP)
+      return "Up";
+    else if(closeState == State.DOWN)
+      return "Down";
     else
       return "-";
   }
 
-  public void calculateMoveType(Range firstRange, Range secondRange, RecordCalculated firstRecord, RecordCalculated secondRecord, State state, List<RecordCalculated> sameCycleRecords) {
-    if (firstRange != null && secondRange != null && state == State.UP) {
+  public Float getPreviousClose() {
+    return previousClose;
+  }
 
-      if (firstRange.getRisingChannel().getLowerTradedValue() != null && secondRange.getRisingChannel().getLowerTradedValue() != null) {
+  public void calculateMoveType(Range firstRange, Range secondRange, RecordCalculated firstRecord, RecordCalculated
+      secondRecord, State state, List<RecordCalculated> sameCycleRecords) {
+    moveType = MoveType.BLANK;
 
-        if (high > firstRange.getRisingChannel().getLowerTradedValue() && high > secondRange.getRisingChannel().getLowerTradedValue()) {
-          boolean isAlreadyStrongUp = false;
-          for (RecordCalculated recordCalculated : sameCycleRecords)
-            if (recordCalculated.moveType == MoveType.STRONG_UP)
-              isAlreadyStrongUp = true;
-
-          if (isAlreadyStrongUp)
-            moveType = MoveType.JUSTIFIED_STRONG_UP;
-          else
-            moveType = MoveType.STRONG_UP;
-        } else if (high <= secondRange.getRisingChannel().getLowerTradedValue() && secondRecord.state == State.UP) {
-          moveType = MoveType.FALSE_UP;
-        } else if (high < firstRange.getRisingChannel().getLowerTradedValue()) {
-          moveType = MoveType.WEAK_UP;
-        } else {
-          moveType = MoveType.BLANK;
-        }
-      } else {
-        moveType = MoveType.BLANK;
-      }
-    } else if (firstRange != null && state == State.UP) {
-      if (firstRange.getRisingChannel() != null) {
-        if (firstRange.getRisingChannel().getLowerTradedValue() != null && high > firstRange.getRisingChannel().getLowerTradedValue()) {
-          boolean isAlreadyStrongUp = false;
-          if (high > firstRange.getRisingChannel().getLowerTradedValue())
+    if (firstRange != null && secondRecord != null && state == State.UP) {
+      if (high >= firstRange.getRisingChannel().getLowerTradedValue()) {
+        if (secondRange != null) {
+          if (high >= secondRange.getRisingChannel().getLowerTradedValue()) {
+            boolean isAlreadyStrongUp = false;
             for (RecordCalculated recordCalculated : sameCycleRecords)
-              if (recordCalculated.moveType == MoveType.STRONG_UP)
+              if (recordCalculated.moveType == MoveType.STRONG_UP) {
                 isAlreadyStrongUp = true;
+                break;
+              }
 
-          if (isAlreadyStrongUp)
-            moveType = MoveType.JUSTIFIED_STRONG_UP;
-          else
-            moveType = MoveType.STRONG_UP;
-        }
-      } else {
-        moveType = MoveType.BLANK;
-      }
-    } else if (firstRange != null && secondRange != null && state == State.DOWN) {
-      if (firstRange.getFallingChannel().getHigherTradedValue() != null && secondRange.getFallingChannel().getHigherTradedValue() != null) {
-        if (low < firstRange.getFallingChannel().getHigherTradedValue() && low < secondRange.getFallingChannel().getHigherTradedValue()) {
-          boolean isAlreadyStrongDown = false;
-          for (RecordCalculated recordCalculated : sameCycleRecords)
-            if (recordCalculated.moveType == MoveType.STRONG_UP)
-              isAlreadyStrongDown = true;
-
-          if (isAlreadyStrongDown)
-            moveType = MoveType.JUSTIFIED_STRONG_DOWN;
-          else
-            moveType = MoveType.STRONG_DOWN;
-        } else if (low >= secondRange.getFallingChannel().getHigherTradedValue() && secondRecord.state == State.DOWN) {
-          moveType = MoveType.FALSE_DOWN;
-        } else if (low < firstRange.getFallingChannel().getHigherTradedValue()) {
-          moveType = MoveType.WEAK_DOWN;
+            if (isAlreadyStrongUp)
+              moveType = MoveType.JUSTIFIED_STRONG_UP;
+            else
+              moveType = MoveType.STRONG_UP;
+          } else if ((secondRecord.moveType == MoveType.STRONG_UP || secondRecord.moveType == MoveType.JUSTIFIED_STRONG_UP) && high < secondRange.getRisingChannel().getLowerTradedValue()) {
+            moveType = MoveType.FALSE_UP;
+          } else if ((secondRecord.moveType == MoveType.STRONG_DOWN || secondRecord.moveType == MoveType.JUSTIFIED_STRONG_DOWN) && high < secondRange.getRisingChannel().getLowerTradedValue()) {
+            moveType = MoveType.WEAK_UP;
+          }
         } else {
-          moveType = MoveType.BLANK;
+          if (secondRecord.moveType == MoveType.STRONG_UP || secondRecord.moveType == MoveType.JUSTIFIED_STRONG_UP) {
+            moveType = MoveType.FALSE_UP;
+          } else if (secondRecord.moveType == MoveType.STRONG_DOWN || secondRecord.moveType == MoveType.JUSTIFIED_STRONG_DOWN) {
+            moveType = MoveType.WEAK_UP;
+          }
         }
-      } else {
-        moveType = MoveType.BLANK;
       }
+    } else if (firstRange != null && secondRecord == null && state == State.UP) {
+      if (high >= firstRange.getRisingChannel().getLowerTradedValue()) {
+        boolean isAlreadyStrongUp = false;
+        for (RecordCalculated recordCalculated : sameCycleRecords)
+          if (recordCalculated.moveType == MoveType.STRONG_UP) {
+            isAlreadyStrongUp = true;
+            break;
+          }
 
-    } else if (firstRange != null && state == State.DOWN) {
-      if (firstRange.getFallingChannel() != null) {
-        if (firstRange.getFallingChannel().getHigherTradedValue() != null && low < firstRange.getFallingChannel().getHigherTradedValue()) {
-          boolean isAlreadyStrongDown = false;
-          for (RecordCalculated recordCalculated : sameCycleRecords)
-            if (recordCalculated.moveType == MoveType.STRONG_UP)
-              isAlreadyStrongDown = true;
-          if (isAlreadyStrongDown)
-            moveType = MoveType.JUSTIFIED_STRONG_DOWN;
-          else
-            moveType = MoveType.STRONG_DOWN;
+        if (isAlreadyStrongUp)
+          moveType = MoveType.JUSTIFIED_STRONG_UP;
+        else
+          moveType = MoveType.STRONG_UP;
+      }
+    } else if (firstRange != null && secondRecord != null && state == State.DOWN) {
+      if (low <= firstRange.getFallingChannel().getHigherTradedValue()) {
+        if (secondRange != null) {
+          if (low <= secondRange.getFallingChannel().getHigherTradedValue()) {
+            boolean isAlreadyStrongDown = false;
+            for (RecordCalculated recordCalculated : sameCycleRecords)
+              if (recordCalculated.moveType == MoveType.STRONG_DOWN) {
+                isAlreadyStrongDown = true;
+                break;
+              }
+
+            if (isAlreadyStrongDown)
+              moveType = MoveType.JUSTIFIED_STRONG_DOWN;
+            else
+              moveType = MoveType.STRONG_DOWN;
+          } else if ((secondRecord.moveType == MoveType.STRONG_DOWN || secondRecord.moveType == MoveType.JUSTIFIED_STRONG_DOWN) && low > secondRange.getFallingChannel().getHigherTradedValue()) {
+            moveType = MoveType.FALSE_DOWN;
+          } else if ((secondRecord.moveType == MoveType.STRONG_UP || secondRecord.moveType == MoveType.JUSTIFIED_STRONG_UP) && low > secondRange.getFallingChannel().getHigherTradedValue()) {
+            moveType = MoveType.WEAK_DOWN;
+          }
         } else {
-          moveType = MoveType.BLANK;
+          if (secondRecord.moveType == MoveType.STRONG_UP || secondRecord.moveType == MoveType.JUSTIFIED_STRONG_UP) {
+            moveType = MoveType.WEAK_DOWN;
+          } else if (secondRecord.moveType == MoveType.STRONG_DOWN || secondRecord.moveType == MoveType.JUSTIFIED_STRONG_DOWN) {
+            moveType = MoveType.FALSE_DOWN;
+          }
         }
-      } else {
-        moveType = MoveType.BLANK;
       }
+    } else if (firstRange != null && secondRecord == null && state == State.DOWN) {
+      if (low <= firstRange.getFallingChannel().getHigherTradedValue()) {
+        boolean isAlreadyStrongDown = false;
+        for (RecordCalculated recordCalculated : sameCycleRecords)
+          if (recordCalculated.moveType == MoveType.STRONG_DOWN) {
+            isAlreadyStrongDown = true;
+            break;
+          }
 
-    } else {
-      moveType = MoveType.BLANK;
+        if (isAlreadyStrongDown)
+          moveType = MoveType.JUSTIFIED_STRONG_DOWN;
+        else
+          moveType = MoveType.STRONG_DOWN;
+      }
     }
   }
+
 }

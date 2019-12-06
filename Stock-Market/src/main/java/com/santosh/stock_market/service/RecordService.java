@@ -23,8 +23,12 @@ public class RecordService {
     recordRepository.deleteRecordByDate(date);
   }
 
-  public List<Record> findByScripIdAndStartDateBeforeAndEndDateAfter(Long id, Date startDate, Date endDate){
+  public List<Record> findByScripIdAndDateBetween(Long id, Date startDate, Date endDate){
     return recordRepository.findByScripIdAndDateBetween(id, startDate, endDate, new Sort(Sort.Direction.ASC, "date"));
+  }
+
+  public List<Record> findByScripIdAndDateLessThanEqual(Long id, Date date){
+    return recordRepository.findByScripIdAndDateLessThanEqual(id, date,  new Sort(Sort.Direction.ASC, "date"));
   }
 
 }

@@ -28,7 +28,6 @@ let bootApp = () => {
     // frame: false,
     webPreferences: {
       nodeIntegration: true
-      // blinkFeatures: 'OverlayScrollbars'
     }
   });
 
@@ -56,6 +55,22 @@ let bootApp = () => {
 
   // mainWindow.setMenu(null);
 };
+
+
+
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
+  })
+}
 
 
 //Listen for app to be ready
@@ -89,15 +104,6 @@ const mainMenuTemplate = [
   {
     label: 'File',
     submenu: [
-      {
-        label: 'Add Item',
-        click() {
-          createAddWindow();
-        }
-      },
-      {
-        label: 'Clear Item'
-      },
       {
         label: 'Quit',
         accelerator: process.platform == 'darwin' ? 'Command+Q' : 'Ctrl+Q',

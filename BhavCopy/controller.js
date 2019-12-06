@@ -170,12 +170,15 @@ stockMarketAppController.controller('dashboardController', ['$rootScope', '$scop
 	$rootScope.bodyType = 2;
 	$scope.records=Array();
 
+	var now = new Date();
+	now.setMonth(now.getMonth()-4);
+
 	$scope.scan = {
 		selectedProfile: null,
 		selectedScrip: null,
-		startDate: null,
-		endDate: null,
-		timeFrame: null
+		startDate: now,
+		endDate: new Date(),
+		timeFrame: "daily"
 	};
 
 	$scope.profiles = [];
@@ -221,6 +224,7 @@ stockMarketAppController.controller('dashboardController', ['$rootScope', '$scop
 		apiService.getFilteredRecordData($scope.scan.selectedScrip, filterData).then(function (response) {
 			$scope.records = response.data.records;
 			console.log(response.data)
+			$scope.selectedRecord=null;
 		}, function (errorResponse) {
 			console.log(errorResponse.data)
 			console.log(errorResponse)
@@ -780,6 +784,84 @@ stockMarketAppController.controller('updateProfileController', ['$rootScope', '$
 
 stockMarketAppController.controller('priceAdjustmentController', ['$rootScope', '$scope', 'apiService', '$window', '$location', '$sce', 'authService', '$timeout', 'appService', function ($rootScope, $scope, apiService, $window, $location, $sce, authService, $timeout, appService) {
 	$rootScope.bodyType = 2;
+
+	$scope.formData = {
+		scripId: '',
+		priceAdjustmentType: '1',
+		numerator:'',
+		denominator:'',
+		date:new Date()
+	};
+	$scope.scrips = [];
+
+	// priceAdjustment
+
+	$scope.formFeedback = $rootScope.getShowableFeedback('', false);
+	let defaultButtonText = $sce.trustAsHtml('AdjustPrice');
+	$scope.adjustPriceButtonElement = defaultButtonText;
+	$scope.disabledAdjustPriceButtonElement = false;
+
+	$timeout(function () {
+		apiService.getAllScrip().then(function (response) {
+			$scope.scrips = response.data;
+		});
+	}, 100);
+
+	$scope.adjustPrice = () => {
+
+	let date = new Date($scope.formData.date);
+
+		var data = {
+			scripId: $scope.formData.scripId,
+			priceAdjustmentType: $scope.formData.priceAdjustmentType, 
+			numerator: $scope.formData.numerator,
+			denominator: $scope.formData.denominator,
+			date: date.getDate() + "-" + (date.getMonth()+1) + "-" + date.getFullYear()
+		}
+		console.log(data);
+
+		$scope.adjustPriceButtonElement = $sce.trustAsHtml('<i class="fa fa-spinner fa-spin"></i> Adjusting...');
+		$scope.disabledAdjustPriceButtonElement = true;
+
+		$timeout(function () {
+			apiService.priceAdjustment(data).then(function (response) {
+				console.log(response.data)
+
+				$scope.formData = {
+					scripId: '',
+					priceAdjustmentType: '1',
+					numerator:'',
+					denominator:'',
+					date:new Date()
+				};
+
+				$scope.priceAdjustmentForm.scrip.$setPristine();
+				$scope.priceAdjustmentForm.scrip.$setUntouched();
+				$scope.priceAdjustmentForm.priceAdjustmentType.$setPristine();
+				$scope.priceAdjustmentForm.priceAdjustmentType.$setUntouched();
+				$scope.priceAdjustmentForm.numerator.$setPristine();
+				$scope.priceAdjustmentForm.numerator.$setUntouched();
+				$scope.priceAdjustmentForm.denominator.$setPristine();
+				$scope.priceAdjustmentForm.denominator.$setUntouched();
+				$scope.priceAdjustmentForm.date.$setPristine();
+				$scope.priceAdjustmentForm.date.$setUntouched();
+
+
+				$scope.formFeedback = $rootScope.getShowableFeedback('Price has been adjusted successfully', false);
+			}, function (errorResponse) {
+				console.log(errorResponse)
+				if (errorResponse.status == 4090) {
+					$scope.formFeedback = $rootScope.getShowableFeedback('Scrip is not found!', true);
+				}
+			}).then(function () {
+				$scope.adjustPriceButtonElement = defaultButtonText;
+				$scope.disabledAdjustPriceButtonElement = false;
+				$timeout(function () {
+					$scope.formFeedback = $rootScope.getShowableFeedback('', false);
+				}, 2000);
+			});
+		}, 200);
+	};
 }]);
 
 stockMarketAppController.controller('logoutController', ['$rootScope', '$scope', 'apiService', '$window', '$location', '$sce', 'authService', '$timeout', 'appService', function ($rootScope, $scope, apiService, $window, $location, $sce, authService, $timeout, appService) {

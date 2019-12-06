@@ -155,6 +155,7 @@ app.service('apiService', ['$http', '$window', function ($http, $window) {
 
 	this.updateData = (date, rawData) => { return $http({ method: 'POST', url: _baseUrl + '/record/update/' + date, data: rawData }); };
 	this.getFilteredRecordData = (scripId, filterData) => { return $http({ method: 'POST', url: _baseUrl + '/record/filter/' + scripId, data: filterData }); };
+	this.priceAdjustment = (data) => { return $http({ method:'POST', url: _baseUrl+'/record/price-adjustment', data: data}); }; 
 
 	this.getAllUser = function () { return $http({ method: 'GET', url: _baseUrl + '/user' }); };
 	this.getUser = function (id) { return $http({ method: 'GET', url: _baseUrl + '/user/' + id }); };
@@ -302,6 +303,19 @@ app.filter('gender', function () {
 		}
 		return '';
 	}
+}).filter('buttonClass', function(){
+	return function (maColour) {
+		if (maColour == "green") {
+			return 'btn-success';
+		}
+		else if (maColour == "red") {
+			return 'btn-danger';
+		}
+		else if (maColour == "grey") {
+			return 'btn-secondary';
+		}
+		return '';
+	}
 });
 
 app.directive('allowNumbersOnly', () => {
@@ -434,4 +448,20 @@ app.directive('compareTo', () => {
 		}
 	};
 });
+
+
+app.directive('ngConfirmClick', [
+	function(){
+			return {
+					link: function (scope, element, attr) {
+							var msg = attr.ngConfirmClick || "Are you sure?";
+							var clickAction = attr.confirmedClick;
+							element.bind('click',function (event) {
+									if ( window.confirm(msg) ) {
+											scope.$eval(clickAction)
+									}
+							});
+					}
+			};
+}]);
 

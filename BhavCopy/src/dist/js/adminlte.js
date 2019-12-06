@@ -344,7 +344,7 @@
 
         var max = this._max(heights);
 
-        $(Selector.CONTENT).css('min-height', max - heights.footer);
+        $(Selector.CONTENT).css('min-height', max - (heights.footer+heights.header)-30);
 
         if ($('body').hasClass(ClassName.LAYOUT_FIXED)) {
           if (typeof $.fn.overlayScrollbars !== 'undefined') {

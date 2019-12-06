@@ -54,7 +54,7 @@
                       <select class="form-control select2" ng-model="formData.scripIds" name="scripIds"
                         style="width: 100%;" multiple="multiple" size="10" ng-required="true">
                         <option value="" disabled selected>Select scrips</option>
-                        <option ng-repeat="scrip in scrips | limitTo:100" value="{{ scrip.id }}">{{ scrip.name }}</option>
+                        <option ng-repeat="scrip in scrips" value="{{ scrip.id }}">{{ scrip.name }}</option>
                       </select>
                       <div class="invalid-feedback"
                         ng-show="(updateProfileForm.scripIds.$dirty || updateProfileForm.scripIds.$touched)  && updateProfileForm.scripIds.$error.required">

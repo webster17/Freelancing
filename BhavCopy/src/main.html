@@ -98,8 +98,70 @@
 			display: none;
 		}
 
-		.mh-1{
-			margin: 0px 1px;
+		.table td,
+		.table th {
+			padding: .45rem !important;
+		}
+
+		.mh-1 {
+			height: 1.6rem;
+			cursor: text;
+			margin: 0px 0.12em;
+		}
+
+		.DivForHoverItem {
+			height: 1.6rem;
+			/* line-height: normal; */
+			cursor: text;
+			font-size: 16px;
+			/* background-color: grey; */
+		}
+
+		.ma {
+			height: 1.4rem;
+			font-size: 16px;
+		}
+
+		.HiddenText {
+			display: none;
+		}
+
+		.DivForHoverItem:hover .HiddenText {
+			display: block;
+			color: grey;
+		}
+
+		.record-container {
+			overflow: scroll;
+		}
+
+		.record-view {
+			overflow: scroll;
+		}
+
+		thead tr:nth-child(1) th {
+			background: white;
+			position: sticky;
+			top: 0;
+			z-index: 10;
+		}
+
+		.cursor-pointer {
+			cursor: pointer;
+		}
+
+		.high-lighter {
+			height: 0.3rem;
+			margin: 0px 0.12em;
+		}
+
+		.highLight-high{
+			background-color: #28a745;
+			color: white;
+		}
+		.highLight-low{
+			background-color: #dc3545;
+			color: white;
 		}
 
 		/* #myModal {
@@ -136,70 +198,6 @@
 				<li class="nav-item d-none d-sm-inline-block">
 					<a href="#/dashboard" class="nav-link">Home</a>
 				</li>
-			</ul>
-
-			<!-- SEARCH FORM -->
-			<form class="form-inline ml-3">
-				<div class="input-group input-group-sm">
-					<input class="form-control form-control-navbar" name="serarch" type="search" placeholder="Search"
-						aria-label="Search">
-					<div class="input-group-append">
-						<button class="btn btn-navbar" type="submit">
-							<i class="fas fa-search"></i>
-						</button>
-					</div>
-				</div>
-			</form>
-
-			<!-- Right navbar links -->
-			<ul class="navbar-nav ml-auto">
-				<!-- Messages Dropdown Menu -->
-				<li class="nav-item dropdown">
-					<a class="nav-link" data-toggle="dropdown" href="JavaScript:void(0)">
-						<i class="far fa-comments"></i>
-						<span class="badge badge-danger navbar-badge">3</span>
-					</a>
-					<div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-						<a href="JavaScript:void(0)" class="dropdown-item">
-							<!-- Message Start -->
-							<div class="media">
-								<img src="./dist/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 mr-3 img-circle">
-								<div class="media-body">
-									<h3 class="dropdown-item-title">
-										Mukul
-										<span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-									</h3>
-									<p class="text-sm">Your otp is 567823</p>
-								</div>
-							</div>
-							<!-- Message End -->
-						</a>
-						<!-- <div class="dropdown-divider"></div> -->
-						<!-- <a href="JavaScript:void(0)" class="dropdown-item dropdown-footer">See All Messages</a> -->
-					</div>
-				</li>
-				<!-- Notifications Dropdown Menu -->
-				<!-- <li class="nav-item dropdown">
-					<a class="nav-link" data-toggle="dropdown" href="JavaScript:void(0)">
-						<i class="far fa-bell"></i>
-						<span class="badge badge-warning navbar-badge">15</span>
-					</a>
-					<div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-						<span class="dropdown-item dropdown-header">15 Notifications</span>
-						<div class="dropdown-divider"></div>
-						<a href="JavaScript:void(0)" class="dropdown-item">
-							<i class="fas fa-envelope mr-2"></i> 4 new messages
-							<span class="float-right text-muted text-sm">3 mins</span>
-						</a>
-						<div class="dropdown-divider"></div>
-						<a href="JavaScript:void(0)" class="dropdown-item">
-							<i class="fas fa-file mr-2"></i> 3 new reports
-							<span class="float-right text-muted text-sm">2 days</span>
-						</a>
-						<div class="dropdown-divider"></div>
-						<a href="JavaScript:void(0)" class="dropdown-item dropdown-footer">See All Notifications</a>
-					</div>
-				</li> -->
 			</ul>
 		</nav>
 		<!-- /.navbar -->

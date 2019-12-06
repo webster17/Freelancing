@@ -47,8 +47,8 @@
                     <a class='btn mr-2 btn-outline-primary btn-sm update' ng-href="{{'#/update-user/'+user.id}}">
                       <i class='fa fa-edit' aria-hidden="true"></i>
                     </a>
-                    <button class='btn btn-outline-danger btn-sm delete' ng-click="deleteUser(user.id)"
-                      ng-disabled="deleteDisabledButtonElement">
+                    <button class='btn btn-outline-danger btn-sm delete' confirmed-click="deleteUser(user.id)"
+                      ng-confirm-click="Are you sure to delete?" ng-disabled="deleteDisabledButtonElement">
                       <i class="fa fa-trash" aria-hidden="true"></i>
                     </button>
                   </td>

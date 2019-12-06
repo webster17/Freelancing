@@ -30,59 +30,80 @@
             </div>
             <!-- /.card-header -->
             <!-- form start -->
-            <form role="form">
+            <form name="priceAdjustmentForm" ng-submit="adjustPrice()" novalidate>
               <div class="card-body">
                 <div class="col-md-8 offset-md-2 align-self-center">
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-md-3 col-form-label">Scrip</label>
                     <div class="col-md-9">
-                      <select class="form-control select2" style="width: 100%;">
-                        <option selected="selected">Alabama</option>
-                        <option>Alaska</option>
-                        <option>California</option>
-                        <option>Delaware</option>
-                        <option>Tennessee</option>
-                        <option>Texas</option>
-                        <option>Washington</option>
+                      <select class="form-control" style="width: 100%;" name="scrip" ng-model="formData.scripId" ng-required="true">
+                        <option value="" disabled selected>Select scrips</option>
+                        <option ng-repeat="scrip in scrips " value="{{ scrip.id }}">{{ scrip.name }}</option>
                       </select>
+                      <div class="invalid-feedback" style="display: block;"
+                        ng-show="(priceAdjustmentForm.scrip.$dirty || priceAdjustmentForm.scrip.$touched) && priceAdjustmentForm.scrip.$error.required">
+                        Please select any one scrip.</div>
                     </div>
                   </div>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-md-3 col-form-label">Bonus/Split</label>
                     <div class="col-md-9">
-                      <select class="form-control select2" style="width: 100%;">
-                        <option selected="selected" value="1">Bonus</option>
+                      <select class="form-control" style="width: 100%;" name="priceAdjustmentType" ng-model="formData.priceAdjustmentType" ng-required="true">
+                        <option value="1">Bonus</option>
                         <option value="2">Split</option>
+                        <option value="3">Bonus-Reverse</option>
+                        <option value="4">Split-Reverse</option>
                       </select>
+                      <div class="invalid-feedback" style="display: block;"
+                        ng-show="(priceAdjustmentForm.priceAdjustmentType.$dirty || priceAdjustmentForm.priceAdjustmentType.$touched) && priceAdjustmentForm.priceAdjustmentType.$error.required">
+                        Please select any one price adjustment type.</div>
                     </div>
                   </div>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-md-3 col-form-label">Ratio</label>
                     <div class="col-md-4">
-                      <input type="number" class="form-control" id="inputEmail3" placeholder="Numerator">
+                      <input type="number" class="form-control" name="numerator" ng-model="formData.numerator" placeholder="Numerator" ng-required="true"
+                        allow-numbers-only>
+                        
+                      <div class="invalid-feedback" style="display: block;"
+                      ng-show="(priceAdjustmentForm.numerator.$dirty || priceAdjustmentForm.numerator.$touched) && priceAdjustmentForm.numerator.$error.required">
+                      Numerator can not be empty.</div>
                     </div>
                     <div class="col-md-1 mt-1 text-center">
                       /
                     </div>
                     <div class="col-md-4">
-                      <input type="number" class="form-control" id="inputEmail3" placeholder="Denominator">
+                      <input type="number" class="form-control" name="denominator" ng-model="formData.denominator" placeholder="Denominator" ng-required="true" 
+                        allow-numbers-only>
+                        
+                      <div class="invalid-feedback" style="display: block;"
+                      ng-show="(priceAdjustmentForm.denominator.$dirty || priceAdjustmentForm.denominator.$touched) && priceAdjustmentForm.denominator.$error.required">
+                      Denominator can not be empty.</div>
                     </div>
                   </div>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-md-3 col-form-label">Date</label>
                     <div class="col-md-9">
-                      <div class="input-group">
-                        <input type="date" class="form-control">
-                      </div>
+                        <input type="date" name="date" ng-model="formData.date" class="form-control" ng-required="true">
+                        <div class="invalid-feedback" style="display: block;"
+                          ng-show="(priceAdjustmentForm.date.$dirty || priceAdjustmentForm.date.$touched) && priceAdjustmentForm.date.$error.required">
+                          Date can not be empty.</div>
                     </div>
                   </div>
+                  <div class="row">
+                      <div class="offset-md-3 col-md-9 text-center mt-2">
+                        <p ng-class="formFeedback.class" style="margin: 0px;">{{ formFeedback.message }}</p>
+                      </div>
+                    </div>
                 </div>
               </div>
               <!-- /.card-body -->
 
               <div class="card-footer">
                 <div class="row justify-content-end">
-                  <button type="submit" class="btn btn-primary">Add New User</button>
+                    <button type="submit" class="btn btn-primary"
+                    ng-disabled="(priceAdjustmentForm.$pristine || priceAdjustmentForm.$invalid) || disabledAdjustPriceButtonElement"
+                    ng-bind-html="adjustPriceButtonElement">Adjust Price</button>
                 </div>
               </div>
             </form>
@@ -95,28 +116,4 @@
     </div><!-- /.container-fluid -->
   </section>
   <!-- /.content -->
-
-
-
-  <script>
-    $(function () {
-      $("#example1").DataTable();
-      //Initialize Select2 Elements
-      $('.select2bs4').select2({
-        theme: 'bootstrap4'
-      })
-
-      //Initialize Select2 Elements
-      $('.select2').select2()
-
-      
-    $('[data-mask]').inputmask()
-
-
-      //Datemask dd/mm/yyyy
-      $('#datemask').inputmask('dd/mm/yyyy', { 'placeholder': 'dd/mm/yyyy' })
-    });
-
-  </script>
-
 </div>

@@ -22,4 +22,6 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 
   List<Record> findByScripIdAndDateBetween(Long scripId, Date startDate, Date endDate, Sort sort);
 
+  List<Record> findByScripIdAndDateLessThanEqual(Long scripId, Date date, Sort sort);
+
 }

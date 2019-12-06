@@ -40,14 +40,16 @@ public class RecordController {
 
     if (recordDate != null) {
       for (RawRecordDTO rawRecordDto : rawRecordDTOS) {
-        Optional<Scrip> scrip = scripService.findByIsin(rawRecordDto.getIsin());
-        if (scrip.isEmpty()) {
-          scripService.save(new Scrip(rawRecordDto.getScripName().toUpperCase(), rawRecordDto.getIsin().toUpperCase(), rawRecordDto.getSeries().toUpperCase()));
-          scrip = scripService.findByIsin(rawRecordDto.getIsin());
-        }
-        if (scrip.isPresent()) {
-          Record rawRecord = new Record(scrip.get(), rawRecordDto.getOpen(), rawRecordDto.getHigh(), rawRecordDto.getLow(), rawRecordDto.getClose(), rawRecordDto.getLast(), rawRecordDto.getPreviousClose(), rawRecordDto.getTotalTradeQuantity(), rawRecordDto.getTotalTradeValue(), rawRecordDto.getTotalTrades(), recordDate);
-          recordService.save(rawRecord);
+        if(rawRecordDto.getSeries().equalsIgnoreCase("EQ") || rawRecordDto.getSeries().equalsIgnoreCase("BE")) {
+          Optional<Scrip> scrip = scripService.findByIsin(rawRecordDto.getIsin());
+          if (scrip.isEmpty()) {
+            scripService.save(new Scrip(rawRecordDto.getScripName().toUpperCase(), rawRecordDto.getIsin().toUpperCase(), rawRecordDto.getSeries().toUpperCase()));
+            scrip = scripService.findByIsin(rawRecordDto.getIsin());
+          }
+          if (scrip.isPresent()) {
+            Record rawRecord = new Record(scrip.get(), rawRecordDto.getOpen(), rawRecordDto.getHigh(), rawRecordDto.getLow(), rawRecordDto.getClose(), rawRecordDto.getLast(), rawRecordDto.getPreviousClose(), rawRecordDto.getTotalTradeQuantity(), rawRecordDto.getTotalTradeValue(), rawRecordDto.getTotalTrades(), recordDate);
+            recordService.save(rawRecord);
+          }
         }
       }
 
@@ -61,22 +63,45 @@ public class RecordController {
 
   @RequestMapping(value = "/filter/{scripId}", method = RequestMethod.POST)
   public ResponseEntity<?> scanRecord(@PathVariable @NonNull Long scripId, @RequestBody ScanRequestDTO scanRequestDTO) {
-
     try {
       Date startDate = new SimpleDateFormat("dd-MM-yyyy").parse(scanRequestDTO.getStartDate());
       Date endDate = new SimpleDateFormat("dd-MM-yyyy").parse(scanRequestDTO.getEndDate());
       Optional<Scrip> optionalScrip = scripService.findById(scripId);
       if (optionalScrip.isPresent()) {
         Scrip scrip = optionalScrip.get();
-        List<Record> records = recordService.findByScripIdAndStartDateBeforeAndEndDateAfter(scripId, startDate, endDate);
+        List<Record> records = recordService.findByScripIdAndDateBetween(scripId, startDate, endDate);
         List<RecordCalculated> recordCalculatedList = new ArrayList<>();
-        for (Record record : records) {
-          recordCalculatedList.add(new RecordCalculated(record.getId(), record.getScrip().getName(), record.getHigh(), record.getLow(), record.getOpen(), record.getClose(), record.getLast(), record.getPreviousClose(), record.getTotalTradeQuantity(), record.getTotalTrades(), record.getTotalTradeValue(), record.getDate()));
-        }
+        for (int i = 0; i < records.size(); i++) {
+          Record record = records.get(i);
+          Float smaValue = null;
+          Float ema39Value = null;
+          Float ema61Value = null;
+          if (i >= 40) {
+            Float totalClose = 0.0F;
+            for (int j = i; j > i - 41; j--)
+              totalClose = totalClose + records.get(j).getClose();
+            smaValue = totalClose / 41;
+          }
+          if (i == 38) {
+            Float totalClose = 0.0F;
+            for (int j = i; j > i - 39; j--) {
+              totalClose = totalClose + records.get(j).getClose();
+            }
 
+            ema39Value = totalClose / 39;
+          }
+          if (i == 60) {
+            Float totalClose = 0.0F;
+            for (int j = i; j > i - 61; j--)
+              totalClose = totalClose + records.get(j).getClose();
+            ema61Value = totalClose / 61;
+          }
+          recordCalculatedList.add(new RecordCalculated(record.getId(), record.getScrip().getName(), record.getHigh(), record.getLow(), record.getOpen(), record.getClose(), record.getLast(), record.getTotalTradeQuantity(), record.getTotalTrades(), record.getTotalTradeValue(), smaValue, ema39Value, ema61Value, record.getDate()));
+        }
         if (recordCalculatedList.size() > 0) {
           recordCalculatedList.get(0).calculateHighLowArrow(null, null);
-          recordCalculatedList.get(0).calculateHighLowArrowColour(null, "grey");
+          recordCalculatedList.get(0).calculateHighLowArrowColour(null, null, new ArrayList<>());
+
 
           for (int i = 1; i < recordCalculatedList.size(); i++) {
 
@@ -84,9 +109,8 @@ public class RecordController {
             RecordCalculated previousRecord = recordCalculatedList.get(i - 1);
 
             RecordCalculated mostRecentUpOrDownRecord = null;
-            for (int k = i-1; k >= 0; k--) {
+            for (int k = i - 1; k >= 0; k--) {
               RecordCalculated recordCalculated = recordCalculatedList.get(k);
-              System.out.println("J:" +k+"  "+recordCalculated.getHighLowArrow());
               if (recordCalculatedList.get(k).getHighLowArrow().equals("Up") || recordCalculatedList.get(k).getHighLowArrow().equals("Down")) {
                 mostRecentUpOrDownRecord = recordCalculatedList.get(k);
                 break;
@@ -97,130 +121,185 @@ public class RecordController {
             currentRecord.setPreviousRange(previousRecord.getRange());
 
             if (currentRecord.state == State.UP) {
+              RecordCalculated firstRecordForColourState = null, firstRecordForMoveType = null, secondRecordForColourState = null, secondRecordForMoveType = null;
+              Range firstRangeForMoveType = null, firstRangeForColourState = null, secondRangeForColourState = null, secondRangeForMoveType = null;
 
-              //for strong weak calculation
-              if (currentRecord.getHighLowArrow().equals("Up")) {
-                RecordCalculated firstRecord = null, secondRecord = null;
-                //to select first value
-                for (int j = i - 1; j >= 0; j--) {
-                  RecordCalculated selectedRecord = recordCalculatedList.get(j);
-                  if (firstRecord == null || selectedRecord.getHigh() > firstRecord.getHigh())
-                    firstRecord = selectedRecord;
-                  if (selectedRecord.getHighLowArrow().equals("Up") || selectedRecord.getHighLowArrow().equals("Down"))
-                    break;
-                }
-
-                //to select second value
-                for (int j = i - 1; j >= 0; j--) {
-                  RecordCalculated selectedRecord = recordCalculatedList.get(j);
-                  if (selectedRecord.moveType == MoveType.STRONG_UP || selectedRecord.moveType == MoveType.STRONG_DOWN || selectedRecord.moveType == MoveType.JUSTIFIED_STRONG_DOWN || selectedRecord.moveType == MoveType.JUSTIFIED_STRONG_UP) {
-                    secondRecord = selectedRecord;
-                    break;
-                  }
-                }
-
-                Range firstRange = null, secondRange = null;
-                if (firstRecord != null)
-                  firstRange = currentRecord.getTradedValue(firstRecord.getHigh(), State.UP, 2);
-                if (secondRecord != null)
-                  secondRange = currentRecord.getTradedValue(secondRecord.getHigh(), State.UP, 2);
-
-                List<RecordCalculated> sameMoveCycleList = new ArrayList<>();
-                for (int j = i - 1; j >= 0; j--) {
-                  if (recordCalculatedList.get(j).state != currentRecord.state)
-                    break;
-                  sameMoveCycleList.add(recordCalculatedList.get(j));
-                }
-
-                currentRecord.calculateMoveType(firstRange, secondRange, firstRecord, secondRecord, State.UP, sameMoveCycleList);
-
-              } else {
-                currentRecord.setMoveType(MoveType.BLANK);
+              List<RecordCalculated> sameMoveCycleList = new ArrayList<>();
+              for (int j = i - 1; j >= 0; j--) {
+                if (recordCalculatedList.get(j).state != currentRecord.state)
+                  break;
+                sameMoveCycleList.add(recordCalculatedList.get(j));
               }
 
-              //for colour purpose
-              int firstDownEncountered = -1;
+              //to select first value for colour state
               for (int j = i - 1; j >= 0; j--) {
                 RecordCalculated selectedRecord = recordCalculatedList.get(j);
-                if (selectedRecord.getHighLowArrow().equals("Down")) {
-                  firstDownEncountered = j;
-                }
-                if (selectedRecord.getHighLowArrow().equals("Up")) {
+                if (firstRecordForColourState == null || selectedRecord.getHigh() > firstRecordForColourState.getHigh())
+                  firstRecordForColourState = selectedRecord;
+                if (selectedRecord.getHighLowArrow().equals("Up") || selectedRecord.getHighLowArrow().equals("Down"))
+                  break;
+              }
+              if (firstRecordForColourState != null)
+                firstRangeForColourState = currentRecord.getTradedValue(firstRecordForColourState.getHigh(), State.UP, 0);
+
+              //for select second value for colour state
+              for (int j = i - 1; j >= 0; j--) {
+                RecordCalculated selectedRecord = recordCalculatedList.get(j);
+                if (selectedRecord.getHighLowArrow().equals("Down"))
+                  secondRecordForColourState = selectedRecord;
+                if (selectedRecord.getHighLowArrow().equals("Up") && secondRecordForColourState != null)
+                  break;
+              }
+              if (secondRecordForColourState != null)
+                secondRangeForColourState = currentRecord.getTradedValue(secondRecordForColourState.getLow(), State.UP, 0);
+
+              currentRecord.calculateHighLowArrowColour(firstRangeForColourState, secondRangeForColourState, sameMoveCycleList);
+
+              //to select first value for move type
+              for (int j = i - 1; j >= 0; j--) {
+                RecordCalculated selectedRecord = recordCalculatedList.get(j);
+                if (firstRecordForMoveType == null || selectedRecord.getHigh() > firstRecordForMoveType.getHigh())
+                  firstRecordForMoveType = selectedRecord;
+                if (selectedRecord.getHighLowArrow().equals("Up") || selectedRecord.getHighLowArrow().equals("Down") || selectedRecord.getHighLowArrow().equals("N-Up") || selectedRecord.getHighLowArrow().equals("-NDown"))
+                  break;
+              }
+
+              if (firstRecordForMoveType != null)
+                firstRangeForMoveType = currentRecord.getTradedValue(firstRecordForMoveType.getHigh(), State.UP, 2);
+
+              //to select second value for move type
+              for (int j = i - 1; j >= 0; j--) {
+                RecordCalculated selectedRecord = recordCalculatedList.get(j);
+                if (selectedRecord.moveType == MoveType.STRONG_UP || selectedRecord.moveType == MoveType.STRONG_DOWN || selectedRecord.moveType == MoveType.JUSTIFIED_STRONG_DOWN || selectedRecord.moveType == MoveType.JUSTIFIED_STRONG_UP) {
+                  secondRecordForMoveType = selectedRecord;
                   break;
                 }
               }
-              if (firstDownEncountered != -1) {
-                currentRecord.calculateHighLowArrowColour(currentRecord.getTradedValue(recordCalculatedList.get(firstDownEncountered).getHigh(), State.UP, 0), previousRecord.getHighLowArrowColour());
-              } else {
-                currentRecord.calculateHighLowArrowColour(null, previousRecord.getHighLowArrowColour());
-              }
 
-//              if()
+              if (secondRecordForMoveType != null)
+                secondRangeForMoveType = currentRecord.getTradedValue(secondRecordForMoveType.getHigh(), State.UP, 2);
+
+              currentRecord.calculateMoveType(firstRangeForMoveType, secondRangeForMoveType, firstRecordForMoveType, secondRecordForMoveType, State.UP, sameMoveCycleList);
+
             } else if (currentRecord.state == State.DOWN) {
 
-              //for strong weak calculation
-              if (currentRecord.getHighLowArrow().equals("DOWN")) {
+              RecordCalculated firstRecordForColourState = null, firstRecordForMoveType = null, secondRecordForColourState = null, secondRecordForMoveType = null;
+              Range firstRangeForMoveType = null, firstRangeForColourState = null, secondRangeForColourState = null, secondRangeForMoveType = null;
 
-                RecordCalculated firstRecord = null, secondRecord = null;
-
-                //to select first value
-                for (int j = i - 1; j >= 0; j--) {
-                  RecordCalculated selectedRecord = recordCalculatedList.get(j);
-                  if (firstRecord == null || selectedRecord.getLow() < firstRecord.getLow())
-                    firstRecord = selectedRecord;
-                  if (selectedRecord.getHighLowArrow().equals("Up") || selectedRecord.getHighLowArrow().equals("Down"))
-                    break;
-                }
-
-                //to select second value
-                for (int j = i - 1; j >= 0; j--) {
-                  RecordCalculated selectedRecord = recordCalculatedList.get(j);
-                  if (selectedRecord.moveType == MoveType.STRONG_UP || selectedRecord.moveType == MoveType.STRONG_DOWN || selectedRecord.moveType == MoveType.JUSTIFIED_STRONG_DOWN || selectedRecord.moveType == MoveType.JUSTIFIED_STRONG_UP) {
-                    secondRecord = selectedRecord;
-                    break;
-                  }
-                }
-
-                Range firstRange = null, secondRange = null;
-                if (firstRecord != null)
-                  firstRange = currentRecord.getTradedValue(firstRecord.getLow(), State.DOWN, 2);
-                if (secondRecord != null)
-                  secondRange = currentRecord.getTradedValue(secondRecord.getLow(), State.DOWN, 2);
-
-                List<RecordCalculated> sameMoveCycleList = new ArrayList<>();
-                for (int j = i - 1; j >= 0; j--) {
-                  if (recordCalculatedList.get(j).state != currentRecord.state)
-                    break;
-                  sameMoveCycleList.add(recordCalculatedList.get(j));
-                }
-
-                currentRecord.calculateMoveType(firstRange, secondRange, firstRecord, secondRecord, State.DOWN, sameMoveCycleList);
-
-              } else {
-                currentRecord.setMoveType(MoveType.BLANK);
+              List<RecordCalculated> sameMoveCycleList = new ArrayList<>();
+              for (int j = i - 1; j >= 0; j--) {
+                if (recordCalculatedList.get(j).state != currentRecord.state)
+                  break;
+                sameMoveCycleList.add(recordCalculatedList.get(j));
               }
 
-              //for colour purpose
-              int firstUpEncountered = -1;
+              //to select first value for colour state
               for (int j = i - 1; j >= 0; j--) {
                 RecordCalculated selectedRecord = recordCalculatedList.get(j);
-                if (selectedRecord.getHighLowArrow().equals("Up")) {
-                  firstUpEncountered = j;
-                }
-                if (selectedRecord.getHighLowArrow().equals("Down")) {
+                if (firstRecordForColourState == null || selectedRecord.getLow() < firstRecordForColourState.getLow())
+                  firstRecordForColourState = selectedRecord;
+                if (selectedRecord.getHighLowArrow().equals("Up") || selectedRecord.getHighLowArrow().equals("Down"))
+                  break;
+              }
+
+              if (firstRecordForColourState != null)
+                firstRangeForColourState = currentRecord.getTradedValue(firstRecordForColourState.getLow(), State.DOWN, 0);
+
+              //to select second value for colour state
+              for (int j = i - 1; j >= 0; j--) {
+                RecordCalculated selectedRecord = recordCalculatedList.get(j);
+                if (selectedRecord.getHighLowArrow().equals("Up"))
+                  secondRecordForColourState = selectedRecord;
+                if (selectedRecord.getHighLowArrow().equals("Down") && secondRecordForColourState != null)
+                  break;
+              }
+
+              if (secondRecordForColourState != null)
+                secondRangeForColourState = currentRecord.getTradedValue(secondRecordForColourState.getHigh(), State.DOWN, 0);
+
+              currentRecord.calculateHighLowArrowColour(firstRangeForColourState, secondRangeForColourState, sameMoveCycleList);
+
+              //to select first value for move type
+              for (int j = i - 1; j >= 0; j--) {
+                RecordCalculated selectedRecord = recordCalculatedList.get(j);
+                if (firstRecordForMoveType == null || selectedRecord.getLow() < firstRecordForMoveType.getLow())
+                  firstRecordForMoveType = selectedRecord;
+                if (selectedRecord.getHighLowArrow().equals("Up") || selectedRecord.getHighLowArrow().equals("Down") || selectedRecord.getHighLowArrow().equals("N-Up") || selectedRecord.getHighLowArrow().equals("-NDown"))
+                  break;
+              }
+
+              if (firstRecordForMoveType != null)
+                firstRangeForMoveType = currentRecord.getTradedValue(firstRecordForMoveType.getLow(), State.DOWN, 2);
+
+              //to select second value for move type
+              for (int j = i - 1; j >= 0; j--) {
+                RecordCalculated selectedRecord = recordCalculatedList.get(j);
+                if (selectedRecord.moveType == MoveType.STRONG_UP || selectedRecord.moveType == MoveType.STRONG_DOWN || selectedRecord.moveType == MoveType.JUSTIFIED_STRONG_DOWN || selectedRecord.moveType == MoveType.JUSTIFIED_STRONG_UP) {
+                  secondRecordForMoveType = selectedRecord;
                   break;
                 }
               }
-              if (firstUpEncountered != -1) {
-                currentRecord.calculateHighLowArrowColour(currentRecord.getTradedValue(recordCalculatedList.get(firstUpEncountered).getLow(), State.DOWN, 0), previousRecord.getHighLowArrowColour());
-              } else {
-                currentRecord.calculateHighLowArrowColour(null, previousRecord.getHighLowArrowColour());
-              }
+
+              if (secondRecordForMoveType != null)
+                secondRangeForMoveType = currentRecord.getTradedValue(secondRecordForMoveType.getLow(), State.DOWN, 2);
+
+              currentRecord.calculateMoveType(firstRangeForMoveType, secondRangeForMoveType, firstRecordForMoveType, secondRecordForMoveType, State.DOWN, sameMoveCycleList);
+
             } else {
-              currentRecord.calculateHighLowArrowColour(null, previousRecord.getHighLowArrowColour());
+              currentRecord.calculateHighLowArrowColour(null, null, new ArrayList<>());
             }
           }
         }
+
+        float selectedValue=0.0F;
+        boolean isValueSelected=false;
+        for (int i = 0; i < recordCalculatedList.size(); i++) {
+          RecordCalculated recordCalculated = recordCalculatedList.get(i);
+          if (i == 0) {
+            if(recordCalculated.state==State.UP) {
+              selectedValue = recordCalculated.getHigh();
+              isValueSelected = true;
+            }
+            else if(recordCalculated.state == State.DOWN) {
+              selectedValue = recordCalculated.getLow();
+              isValueSelected = true;
+            }
+          } else {
+            RecordCalculated previousRecord= recordCalculatedList.get(i-1);
+
+            if(recordCalculated.state == previousRecord.state && isValueSelected){
+              if (recordCalculated.state == State.UP && recordCalculated.getHigh() > selectedValue) {
+                selectedValue = recordCalculated.getHigh();
+              } else if (recordCalculated.state == State.DOWN && recordCalculated.getLow() < selectedValue) {
+                selectedValue = recordCalculated.getLow();
+              }
+            } else {
+              if(isValueSelected) {
+                for (int j = i - 1; i >= 0; j--) {
+                  RecordCalculated selectedRecord = recordCalculatedList.get(j);
+                  if (previousRecord.state != selectedRecord.state)
+                    break;
+                  if (previousRecord.state == State.UP && selectedRecord.getHigh() == selectedValue) {
+                    selectedRecord.setSelected(true);
+                  } else if (previousRecord.state == State.DOWN && selectedRecord.getLow() == selectedValue) {
+                    selectedRecord.setSelected(true);
+                  }
+                }
+                isValueSelected=false;
+              }
+
+              if(recordCalculated.state==State.UP) {
+                selectedValue = recordCalculated.getHigh();
+                isValueSelected=true;
+              }
+              else if(recordCalculated.state == State.DOWN) {
+                selectedValue = recordCalculated.getLow();
+                isValueSelected = true;
+              }
+            }
+          }
+        }
+
         ScripWithRecordDTO scripWithRecordDTO = new ScripWithRecordDTO(scrip.getId(), scrip.getName(), scrip.getIsin(), scrip.getSeries(), recordCalculatedList);
         return ResponseEntity.ok(scripWithRecordDTO);
       } else {
@@ -229,6 +308,90 @@ public class RecordController {
     } catch (ParseException e) {
       return ResponseEntity.badRequest().body(scanRequestDTO);
     }
+
   }
+
+  private float getSplitValue(float value,int numerator, int denominator){
+    return Math.round(((value*denominator)/numerator)*100)/100F;
+  }
+
+  private float getSplitReverseValue(float value,int numerator, int denominator){
+    return Math.round(((value*numerator)/denominator)*100)/100F;
+  }
+
+  private float getBonusValue(float value,int numerator, int denominator){
+    return Math.round(((value*denominator)/(numerator+denominator))*100)/100F;
+  }
+
+  private float getBonusReverseValue(float value,int numerator, int denominator){
+    return Math.round(((value*(numerator+denominator))/denominator)*100)/100F;
+  }
+
+  @RequestMapping(value = "price-adjustment", method = RequestMethod.POST)
+  public ResponseEntity<?> adjustPrice(@RequestBody PriceAdjustmentDTO priceAdjustmentDTO){
+    Map<String, String> responseData = new HashMap<>();
+    try {
+      Date date = new SimpleDateFormat("dd-MM-yyyy").parse(priceAdjustmentDTO.getDate());
+      Optional<Scrip> optionalScrip = scripService.findById(priceAdjustmentDTO.getScripId());
+      if(optionalScrip.isPresent()){
+        Scrip scrip = optionalScrip.get();
+        List<Record> records = recordService.findByScripIdAndDateLessThanEqual(scrip.getId(), date);
+        if(priceAdjustmentDTO.getPriceAdjustmentType() == 1) {
+          for (Record record : records) {
+            record.setClose(getBonusValue(record.getClose(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setOpen(getBonusValue(record.getOpen(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setHigh(getBonusValue(record.getHigh(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setLow(getBonusValue(record.getLow(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setLast(getBonusValue(record.getLast(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setPreviousClose(getBonusValue(record.getPreviousClose(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            recordService.save(record);
+          }
+        }
+        else if(priceAdjustmentDTO.getPriceAdjustmentType() == 2) {
+          for (Record record : records) {
+            record.setClose(getSplitValue(record.getClose(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setOpen(getSplitValue(record.getOpen(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setHigh(getSplitValue(record.getHigh(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setLow(getSplitValue(record.getLow(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setLast(getSplitValue(record.getLast(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setPreviousClose(getSplitValue(record.getPreviousClose(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            recordService.save(record);
+          }
+        }
+        else if(priceAdjustmentDTO.getPriceAdjustmentType() == 3) {
+          for (Record record : scrip.getRecords()) {
+            record.setClose(getBonusReverseValue(record.getClose(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setOpen(getBonusReverseValue(record.getOpen(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setHigh(getBonusReverseValue(record.getHigh(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setLow(getBonusReverseValue(record.getLow(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setLast(getBonusReverseValue(record.getLast(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setPreviousClose(getBonusReverseValue(record.getPreviousClose(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            recordService.save(record);
+          }
+        }
+        else if(priceAdjustmentDTO.getPriceAdjustmentType() == 4) {
+          for (Record record : scrip.getRecords()) {
+            record.setClose(getSplitReverseValue(record.getClose(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setOpen(getSplitReverseValue(record.getOpen(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setHigh(getSplitReverseValue(record.getHigh(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setLow(getSplitReverseValue(record.getLow(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setLast(getSplitReverseValue(record.getLast(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            record.setPreviousClose(getSplitReverseValue(record.getPreviousClose(), priceAdjustmentDTO.getNumerator(), priceAdjustmentDTO.getDenominator()));
+            recordService.save(record);
+          }
+        }
+        responseData.put("message", "Price has been successfully updated");
+        return ResponseEntity.ok().body(responseData);
+      }else{
+        responseData.put("message", "Scrip is not exist");
+        return ResponseEntity.badRequest().body(responseData);
+      }
+    } catch (ParseException e) {
+      e.printStackTrace();
+      responseData.put("message", "Date is invalid");
+      return ResponseEntity.badRequest().body(responseData);
+    }
+  }
+
 
 }

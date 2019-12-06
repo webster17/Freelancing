@@ -1,34 +1,16 @@
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
-  <!-- Content Header (Page header) -->
-  <section class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1>Dashboard</h1>
-        </div>
-        <div class="col-sm-6">
-          <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item active home">Home</li>
-          </ol>
-        </div>
-      </div>
-    </div><!-- /.container-fluid -->
-  </section>
-
   <!-- Main content -->
   <section class="content">
     <div class="row">
       <div class="col-12">
-        <div class="card card-primary">
-          <div class="card-header">
-            <h3 class="card-title">Records</h3>
-          </div>
-          <!-- /.card-header -->
-          <div class="card-body">
-
+        <div class="card main-card card-primary mt-2" style="margin-bottom: 0.5rem !important;">
+          <div class="card-header" style="padding:  0.4rem 1.75rem; ">
             <form ng-submit="fetchFilteredRecord()" name="scanForm" novalidate>
-              <div class="row mb-4 bg-secondary pt-2 pb-2">
+              <div class="row">
+                <div class="col-md-2 d-flex align-items-center">
+                  <h3>Record</h3>
+                </div>
                 <div class="col-md-2">
                   <select class="form-control select2" style="width:100%;" name="selectedProfile"
                     ng-model="scan.selectedProfile" ng-change="fetchProfileScrip()" style="width: 100%;"
@@ -55,27 +37,27 @@
                       ng-required="true" />
                   </div>
                 </div>
-                <div class="col-md-2  ">
+                <div class="col-md-2">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">
                         <i class="far fa-calendar-times" aria-hidden="true"></i>
                       </span>
                     </div>
-                    <input type="date" class="form-control" ng-model="scan.endDate" name="endDate" ng-required="true" />
+                    <input type="date" class="form-control" ng-model="scan.endDate" id="emd-date" name="endDate"
+                      ng-required="true" />
                   </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
                   <select class="form-control select2" style="width: 100%;" ng-model="scan.timeFrame" name="timeFrame"
                     ng-required="true">
-                    <option value="" disabled selected>Select Time Frame</option>
-                    <option value="daily">Daily</option>
+                    <option value="daily" selected>Daily</option>
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
                   </select>
                 </div>
-                <div class="offset-md-1 col-md-1">
+                <div class="col-md-1">
                   <div class="row justify-content-end pr-4">
                     <button type="submit" class="btn bg-gradient-warning btn-md"
                       ng-disabled="(scanForm.$pristine || scanForm.$invalid) || disabledScanButtonElement"
@@ -84,102 +66,648 @@
                 </div>
               </div>
             </form>
-            <table id="example1" class="table table-striped">
-              <thead>
-                <tr>
-                  <th class="text-center">No.</th>
-                  <th class="text-center">Date</th>
-                  <th class="text-center">Open</th>
-                  <th class="text-center">High</th>
-                  <th class="text-center no-sort">U/D</th>
-                  <th class="text-center">Low</th>
-                  <th class="text-center">Close</th>
-                  <th class="text-center">Volume</th>
-                  <th class="text-center">Range</th>
-                  <th class="text-center">Strong/Weak</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="home" ng-repeat="record in records" ng-click="showData($index)">
-                  <td>
-                    <div class="d-flex justify-content-center">{{ $index + 1 }}</div>
-                  </td>
-                  <td class="open-modal">
-                    <div class="d-flex justify-content-center">{{ record.date }}</div>
-                  </td>
-                  <td>
-                    <div class="d-flex flex-row-reverse justify-content-center">
-                      <div class="pl-1 pr-1 text-success" ng-show="record.open<record.close"><i
-                          class="fa fa-arrow-up"></i></div>
-                      <div class="pl-1 pr-1 text-danger" ng-show="record.open>record.close"><i
-                          class="fa fa-arrow-down"></i></div>
-                      <div class="pl-1 pr-1 text-secondary" ng-show="record.open==record.close"><i
-                          class="fa fa-minus"></i></div>
-                      <div class=" mr-2">{{ record.open | number : 2 }}</div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body" style="padding: 0.5rem 1.25rem;">
+            <div class="row">
+              <div class="col-md-12">
+
+                <div class="record-container">
+                  <table class="table table-hover table-responsive-xl">
+                    <thead>
+                      <tr>
+                        <th scope="col" class="text-center no-sort bg-secondary">#</th>
+                        <th scope="col" class="text-center no-sort bg-secondary">Date</th>
+                        <th scope="col" class="text-center no-sort bg-secondary">Open</th>
+                        <th scope="col" class="text-center no-sort bg-secondary">High</th>
+                        <th scope="col" class="text-center no-sort bg-secondary">U/D</th>
+                        <th scope="col" class="text-center no-sort bg-secondary">Low</th>
+                        <th scope="col" class="text-center no-sort bg-secondary">Close</th>
+                        <th scope="col" class="text-center no-sort bg-secondary">Volume</th>
+                        <th scope="col" class="text-center no-sort bg-secondary">Range</th>
+                        <th scope="col" class="text-center no-sort bg-secondary">Gap</th>
+                        <th scope="col" class="text-center no-sort bg-secondary">MA</th>
+                        <th scope="col" class="text-center no-sort bg-secondary">Strong/Weak</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr scope="row" class="home cursor-pointer"
+                        ng-class="record.id==selectedRecord.id?'table-primary':''" ng-repeat="record in records"
+                        ng-click="showData($index)">
+                        <td>
+                          <div class="d-flex justify-content-center">{{ $index + 1 }}</div>
+                        </td>
+                        <td class="open-modal">
+                          <div class="d-flex justify-content-center">{{ record.date }}</div>
+                        </td>
+                        <td>
+                          <div class="d-flex flex-row-reverse justify-content-center">
+                            <div class="pl-1 pr-1 text-success" ng-show="record.open<record.close"><i
+                                class="fa fa-arrow-up"></i></div>
+                            <div class="pl-1 pr-1 text-danger" ng-show="record.open>record.close"><i
+                                class="fa fa-arrow-down"></i></div>
+                            <div class="pl-1 pr-1 text-secondary" ng-show="record.open==record.close"><i
+                                class="fa fa-minus"></i></div>
+                            <div class=" mr-2">{{ record.open | number : 2 }}</div>
+                          </div>
+                        <td ng-class="(record.selected == 'high')?'highLight-high':''">
+                          <div class="d-flex flex-row-reverse justify-content-center">
+                            <div class=" mr-2">{{ record.high | number : 2 }}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="d-flex justify-content-start">
+                            <div class="pl-1 pr-1" style="color: {{ record.highLowArrowColour }}"
+                              ng-show="record.highLowArrow=='Up'"><i class="fa fa-arrow-up"></i></div>
+                            <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
+                              ng-show="record.highLowArrow=='N-Up'"><i class="fa fa-arrow-up"></i>N-</i></div>
+                          </div>
+                          <div class="d-flex justify-content-center">
+                            <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
+                              ng-show="record.highLowArrow=='N-'">N-</div>
+                            <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
+                              ng-show="record.highLowArrow=='-N'">-N</div>
+                            <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
+                              ng-show="record.highLowArrow=='|'">|</div>
+                            <div class="pl-1 pr-1 text-secondary" ng-show="record.highLowArrow=='-'"><i
+                                class="fa fa-minus"></i></div>
+                          </div>
+                          <div class="d-flex justify-content-end">
+                            <div class="pl-1 pr-1" style="color: {{record.highLowArrowColour}}"
+                              ng-show="record.highLowArrow=='Down'">
+                              <i class="fa fa-arrow-down"></i></div>
+                            <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
+                              ng-show="record.highLowArrow=='-NDown'">-N<i class="fa fa-arrow-down"></i></div>
+                          </div>
+                        </td>
+                        <td ng-class="(record.selected == 'low')?'highLight-low':''">
+                          <div class="d-flex flex-row-reverse justify-content-center">
+                            {{ record.low | number : 2 }}
+                          </div>
+                        </td>
+                        <td>
+                          <div class="d-flex flex-row-reverse justify-content-center">
+                            <div class="pl-1 pr-1 text-success" ng-show="record.closeState=='Up'"><i
+                                class="fa fa-arrow-up"></i></div>
+                            <div class="pl-1 pr-1 text-danger" ng-show="record.closeState=='Down'"><i
+                                class="fa fa-arrow-down"></i></div>
+                            <div class="pl-1 pr-1 text-secondary" ng-show="record.closeState=='-'"><i
+                                class="fa fa-minus"></i></div>
+                            <div class=" mr-2">{{ record.close | number : 2 }}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="d-flex justify-content-center">{{ record.totalTradeQuantity/100000 | number : 2}}
+                          </div>
+                        </td>
+                        <td>
+                          <div class="d-flex justify-content-center">{{ (record.range) | number : 2}}</div>
+                        </td>
+                        <td>
+                          <div class="d-flex justify-content-center">{{record.gap}}</div>
+                        </td>
+                        <td>
+                          <div class="d-flex justify-content-center">
+                            <button type="button" class="btn btn-xs" ng-show="record.sma!=null"
+                              ng-class="record.sma.colour|buttonClass">S41</button>
+                            <button type="button" class="btn btn-xs ml-1" ng-show="record.ema39!=null"
+                              ng-class="record.ema39.colour|buttonClass">E39</button>
+                            <button type="button" class="btn btn-xs ml-1" ng-show="record.ema61!=null"
+                              ng-class="record.ema61.colour|buttonClass">E61</button>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="d-flex justify-content-center font-weight-bold"
+                            style="color:{{ record.moveColour }}">{{record.moveType}}</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="row scrollable-content record-view border border-dark pt-2 pl-2 pr-2 pb-1"
+              ng-show="selectedRecord!=null">
+              <div class="col-md-10">
+                <div class="row">
+                  <div class="col-md-1">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="row pt-1 pb-1">
+                          <div class="col-md-12 font-weight-bold" style="font-size: 1.23rem;">{{ selectedRecord.date}}</div>
+                        </div>
+                      </div>
                     </div>
-                  <td>
-                    <div class="d-flex flex-row-reverse justify-content-center">
-                      <div class=" mr-2">{{ record.high | number : 2 }}</div>
+                  </div>
+                  <div class="col-md-11">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="row justify-content-around">
+                          <div class="col-md-1 ma text-center" style="margin-left:1.8em; padding: 0px;">
+                            <span ng-show="selectedRecord.ema61.plot.rising==0"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                            <span ng-show="selectedRecord.ema39.plot.rising==0"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.sma.plot.rising==0"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.ema61.plot.rising==1"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                            <span ng-show="selectedRecord.ema39.plot.rising==1"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.sma.plot.rising==1"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.ema61.plot.rising==2"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                            <span ng-show="selectedRecord.ema39.plot.rising==2"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.sma.plot.rising==2"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.ema61.plot.rising==3"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                            <span ng-show="selectedRecord.ema39.plot.rising==3"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.sma.plot.rising==3"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.ema61.plot.rising==4"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                            <span ng-show="selectedRecord.ema39.plot.rising==4"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.sma.plot.rising==4"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.ema61.plot.rising==5"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                            <span ng-show="selectedRecord.ema39.plot.rising==5"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.sma.plot.rising==5"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.ema61.plot.rising==6"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                            <span ng-show="selectedRecord.ema39.plot.rising==6"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.sma.plot.rising==6"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.ema61.plot.rising==7"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                            <span ng-show="selectedRecord.ema39.plot.rising==7"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.sma.plot.rising==7"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.ema61.plot.rising==8"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                            <span ng-show="selectedRecord.ema39.plot.rising==8"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.sma.plot.rising==8"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.ema61.plot.rising==9"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                            <span ng-show="selectedRecord.ema39.plot.rising==9"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.sma.plot.rising==9"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px; margin-right: 1.8em;">
+                            <span ng-show="selectedRecord.ema61.plot.rising==10"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                            <span ng-show="selectedRecord.ema39.plot.rising==10"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.sma.plot.rising==10"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                          </div>
+                        </div>
+                        <div class="row mt-1 mb-1">
+                          <div class="col-md-1 font-weight-bold d-flex align-items-end" style="padding: 0px; font-size: 1.1rem;">
+                            {{ selectedRecord.previousClose| number:2 }}
+                          </div>
+                          <div style="padding: 0px;" class="col-md-1 mt-4">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[0].risingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="bg-success mh-1 text-center">
+                              {{ selectedRecord.rangeList[0].risingChannel.tradedValue | number:2 }}</div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[0].risingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1 mt-4">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[1].risingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="bg-success mh-1 text-center">
+                              {{ selectedRecord.rangeList[1].risingChannel.tradedValue | number:2 }}</div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[1].risingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1 mt-4">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[2].risingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="text-center bg-success mh-1">
+                              {{ selectedRecord.rangeList[2].risingChannel.tradedValue | number:2 }}</div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span
+                                  class=" align-bottom">{{ selectedRecord.rangeList[2].risingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[3].risingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="bg-success mh-1 text-center">
+                              {{ selectedRecord.rangeList[3].risingChannel.tradedValue | number:2 }}</div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[3].risingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[4].risingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="text-center bg-success mh-1">
+                              {{ selectedRecord.rangeList[4].risingChannel.tradedValue | number:2 }}</div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[4].risingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1 mt-4">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[5].risingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="text-center bg-success mh-1">
+                              {{ selectedRecord.rangeList[5].risingChannel.tradedValue | number:2 }}</div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[5].risingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1 mt-4">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[6].risingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="text-center bg-success mh-1">
+                              {{ selectedRecord.rangeList[6].risingChannel.tradedValue | number:2 }}</div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[6].risingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1 mt-4">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[7].risingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="text-center bg-success mh-1">
+                              {{ selectedRecord.rangeList[7].risingChannel.tradedValue | number:2 }}</div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[7].risingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1 mt-4">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[8].risingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="text-center bg-success mh-1">
+                              {{ selectedRecord.rangeList[8].risingChannel.tradedValue | number:2 }}</div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[8].risingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row mt-1 mb-1">
+                          <div class="col-md-1 d-flex align-items-start font-weight-bold" style="padding: 0px; font-size: 1.1rem;">
+                            {{ selectedRecord.previousRange | number:2}}
+                          </div>
+                          <div style="padding:0px;" class="col-md-1">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[0].fallingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                            <div class="text-center bg-danger mh-1">
+                              {{ selectedRecord.rangeList[0].fallingChannel.tradedValue | number:2 }}</div>
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[0].fallingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[1].fallingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                            <div class="text-center bg-danger mh-1">
+                              {{ selectedRecord.rangeList[1].fallingChannel.tradedValue | number:2 }}</div>
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[1].fallingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[2].fallingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                            <div class="text-center bg-danger mh-1">
+                              {{ selectedRecord.rangeList[2].fallingChannel.tradedValue | number:2 }}</div>
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[2].fallingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1 mt-4">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[3].fallingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                            <div class="text-center bg-danger mh-1">
+                              {{ selectedRecord.rangeList[3].fallingChannel.tradedValue | number:2 }}</div>
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[3].fallingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1 mt-4">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[4].fallingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                            <div class="text-center bg-danger mh-1">
+                              {{ selectedRecord.rangeList[4].fallingChannel.tradedValue | number:2 }}</div>
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[4].fallingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[5].fallingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                            <div class="text-center bg-danger mh-1">
+                              {{ selectedRecord.rangeList[5].fallingChannel.tradedValue | number:2 }}</div>
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[5].fallingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[6].fallingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                            <div class="text-center bg-danger mh-1">
+                              {{ selectedRecord.rangeList[6].fallingChannel.tradedValue | number:2 }}</div>
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[6].fallingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[7].fallingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                            <div class="text-center bg-danger mh-1">
+                              {{ selectedRecord.rangeList[7].fallingChannel.tradedValue | number:2 }}</div>
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[7].fallingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style="padding:0px;" class="col-md-1">
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{  selectedRecord.rangeList[8].fallingChannel.higherTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                            <div class="text-center bg-danger mh-1">
+                              {{ selectedRecord.rangeList[8].fallingChannel.tradedValue | number:2 }}</div>
+                            <div class="bg-secondary high-lighter"></div>
+                            <div class="DivForHoverItem d-flex align-items-center justify-content-center">
+                              <div class="HiddenText">
+                                <span>{{ selectedRecord.rangeList[8].fallingChannel.lowerTradedValue | number:2 }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row justify-content-around">
+                          <div class="col-md-1 ma text-center" style="margin-left:1.8em; padding: 0px;">
+                            <span ng-show="selectedRecord.sma.plot.falling==0"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                            <span ng-show="selectedRecord.ema39.plot.falling==0"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.ema61.plot.falling==0"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.sma.plot.falling==1"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                            <span ng-show="selectedRecord.ema39.plot.falling==1"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.ema61.plot.falling==1"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.sma.plot.falling==2"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                            <span ng-show="selectedRecord.ema39.plot.falling==2"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.ema61.plot.falling==2"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.sma.plot.falling==3"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                            <span ng-show="selectedRecord.ema39.plot.falling==3"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.ema61.plot.falling==3"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.sma.plot.falling==4"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                            <span ng-show="selectedRecord.ema39.plot.falling==4"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.ema61.plot.falling==4"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.sma.plot.falling==5"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                            <span ng-show="selectedRecord.ema39.plot.falling==5"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.ema61.plot.falling==5"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.sma.plot.falling==6"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                            <span ng-show="selectedRecord.ema39.plot.falling==6"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.ema61.plot.falling==6"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.sma.plot.falling==7"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                            <span ng-show="selectedRecord.ema39.plot.falling==7"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.ema61.plot.falling==7"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.sma.plot.falling==8"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                            <span ng-show="selectedRecord.ema39.plot.falling==8"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.ema61.plot.falling==8"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px;">
+                            <span ng-show="selectedRecord.sma.plot.falling==9"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                            <span ng-show="selectedRecord.ema39.plot.falling==9"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.ema61.plot.falling==9"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                          </div>
+                          <div class="col-md-1 ma text-center" style="padding: 0px; margin-right: 1.8em;">
+                            <span ng-show="selectedRecord.sma.plot.falling==10"
+                              style="color:{{ selectedRecord.sma.colour }}">S41</span>
+                            <span ng-show="selectedRecord.ema39.plot.falling==10"
+                              style="color:{{ selectedRecord.ema39.colour }}">E39</span>
+                            <span ng-show="selectedRecord.ema61.plot.falling==10"
+                              style="color:{{ selectedRecord.ema61.colour }}">E61</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </td>
-                  <td>
-                    <div class="d-flex justify-content-center">
-                      <div class="pl-1 pr-1" style="color: {{ record.highLowArrowColour }}"
-                        ng-show="record.highLowArrow=='Up'"><i class="fa fa-arrow-up"></i></div>
-                      <div class="pl-1 pr-1" style="color: {{record.highLowArrowColour}}"
-                        ng-show="record.highLowArrow=='Down'">
-                        <i class="fa fa-arrow-down"></i></div>
-                      <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
-                        ng-show="record.highLowArrow=='N-'">N-</div>
-                      <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
-                        ng-show="record.highLowArrow=='N-Up'"><i class="fa fa-arrow-up"></i>N-</i></div>
-                      <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
-                        ng-show="record.highLowArrow=='-N'">-N</div>
-                      <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
-                        ng-show="record.highLowArrow=='-NDown'">-N<i class="fa fa-arrow-down"></i></div>
-                      <div class="pl-1 pr-1 font-weight-bold" style="color: {{record.highLowArrowColour}}"
-                        ng-show="record.highLowArrow=='|'">|</div>
-                      <div class="pl-1 pr-1 text-secondary" ng-show="record.highLowArrow=='-'"><i
-                          class="fa fa-minus"></i></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="row pt-1 pb-1">
+                      <div class="col-md-4 font-weight-bold">Move</div>
+                      <div class="col-md-1">:</div>
+                      <div class="col-md-6" style="color:{{ selectedRecord.moveColour }}">{{ selectedRecord.moveType }}
+                      </div>
                     </div>
-                  </td>
-                  <td>
-                    <div class="d-flex flex-row-reverse justify-content-center">
-                      {{ record.low | number : 2 }}
+                    <div class="row pt-1 pb-1">
+                      <div class="col-md-4 font-weight-bold">SMA</div>
+                      <div class="col-md-1">:</div>
+                      <div class="col-md-6" style="color: {{selectedRecord.sma.colour}}">
+                        {{ selectedRecord.sma.value | number : 2 }}</div>
                     </div>
-                  </td>
-                  <td>
-                    <div class="d-flex flex-row-reverse justify-content-center">
-                      <div class="pl-1 pr-1 text-success" ng-show="record.close>record.previousClose"><i
-                          class="fa fa-arrow-up"></i></div>
-                      <div class="pl-1 pr-1 text-danger" ng-show="record.close<record.previousClose"><i
-                          class="fa fa-arrow-down"></i></div>
-                      <div class="pl-1 pr-1 text-secondary" ng-show="record.close==record.previousClose"><i
-                          class="fa fa-minus"></i></div>
-                      <div class=" mr-2">{{ record.close | number : 2 }}</div>
+                    <div class="row pt-1 pb-1">
+                      <div class="col-md-4 font-weight-bold">EMA39</div>
+                      <div class="col-md-1">:</div>
+                      <div class="col-md-6" style="color: {{selectedRecord.ema39.colour}}">
+                        {{ selectedRecord.ema39.value | number : 2 }}</div>
                     </div>
-                  </td>
-                  <td>
-                    <div class="d-flex justify-content-center">{{ record.totalTradeQuantity/100000 | number : 2}}</div>
-                  </td>
-                  <td>
-                    <div class="d-flex justify-content-center">{{ (record.range) | number : 2}}</div>
-                  </td>
-                  <td>
-                    <div class="d-flex justify-content-center">{{record.moveType}}</div>
-                  </td>
-                </tr>
-              </tbody>
-              <!-- <tfoot>
-                  <tr>
-                    <th>Rendering engine</th>
-                    <th>Browser</th>
-                    <th>Platform(s)</th>
-                    <th>Engine version</th>
-                    <th>CSS grade</th>
-                  </tr>
-                  </tfoot> -->
-            </table>
+                    <div class="row pt-1 pb-1">
+                      <div class="col-md-4 font-weight-bold">EMA61</div>
+                      <div class="col-md-1">:</div>
+                      <div class="col-md-6" style="color: {{selectedRecord.ema61.colour}}">
+                        {{ selectedRecord.ema61.value | number : 2 }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
           <!-- /.card-body -->
         </div>
@@ -192,160 +720,33 @@
   <!-- /.content -->
 </div>
 
-<div class="modal fade" id="myModal">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <h4 class="modal-title">{{ selectedRecord.scripName }} | {{ selectedRecord.date }}</h4>
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-      </div>
-
-      <!-- Modal body -->
-      <div class="modal-body">
-        <div class="row">
-          <div class="offset-md-1 col-md-1 mt-4">
-            <div class="row  justify-content-center">{{ selectedRecord.rangeList[0].risingChannel.higherTradedValue | number:2 }}</div>
-            <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[0].risingChannel.tradedValue | number:2 }}</div>
-            <div class="row  justify-content-center">{{ selectedRecord.rangeList[0].risingChannel.lowerTradedValue | number:2 }}</div>
-          </div>
-          <div class="col-md-1 mt-4">
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[1].risingChannel.higherTradedValue | number:2 }}</div>
-              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[1].risingChannel.tradedValue | number:2 }}</div>
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[1].risingChannel.lowerTradedValue | number:2 }}</div>
-          </div>
-          <div class="col-md-1 mt-4">
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[2].risingChannel.higherTradedValue | number:2 }}</div>
-              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[2].risingChannel.tradedValue | number:2 }}</div>
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[2].risingChannel.lowerTradedValue | number:2 }}</div>
-          </div>
-          <div class="col-md-1">
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[3].risingChannel.higherTradedValue | number:2 }}</div>
-              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[3].risingChannel.tradedValue | number:2 }}</div>
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[3].risingChannel.lowerTradedValue | number:2 }}</div>
-          </div>
-          <div class="col-md-1">
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[4].risingChannel.higherTradedValue | number:2 }}</div>
-              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[4].risingChannel.tradedValue | number:2 }}</div>
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[4].risingChannel.lowerTradedValue | number:2 }}</div>
-          </div>
-          <div class="col-md-1 mt-4">
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[5].risingChannel.higherTradedValue | number:2 }}</div>
-              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[5].risingChannel.tradedValue | number:2 }}</div>
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[5].risingChannel.lowerTradedValue | number:2 }}</div>
-          </div>
-          <div class="col-md-1 mt-4">
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[6].risingChannel.higherTradedValue | number:2 }}</div>
-              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[6].risingChannel.tradedValue | number:2 }}</div>
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[6].risingChannel.lowerTradedValue | number:2 }}</div>
-          </div>
-          <div class="col-md-1 mt-4">
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[7].risingChannel.higherTradedValue | number:2 }}</div>
-              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[7].risingChannel.tradedValue | number:2 }}</div>
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[7].risingChannel.lowerTradedValue | number:2 }}</div>
-          </div>
-          <div class="col-md-1 mt-4">
-              <div class="row  justify-content-center text-white">{{ selectedRecord.rangeList[7].risingChannel.higherTradedValue | number:2 }}</div>
-              <div class="row justify-content-center bg-success mh-1">{{ selectedRecord.rangeList[8].risingChannel.tradedValue | number:2 }}</div>
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[8].risingChannel.lowerTradedValue | number:2 }}</div>
-          </div>
-        </div>
-        <br>
-        <div class="row">
-          <div class="col-md-12">
-            <div class="row">
-              <div class="col-md-1 font-weight-bold">Close:</div>
-              <div class="col-md-1">{{ selectedRecord.previousClose| number:2 }}</div>
-              <div class="offset-md-7 col-md-1 font-weight-bold">ATR:</div>
-              <div class="col-md-2">some data</div>
-            </div>
-            <div class="row">
-              <div class="col-md-1 font-weight-bold">Range:</div>
-              <div class="col-md-1">{{ selectedRecord.previousRange | number:2}}</div>
-              <div class="offset-md-7"></div>
-              <div class="col-md-1 font-weight-bold">Move:</div>
-              <div class="col-md-2">some data</div>
-            </div>
-            <div class="row">
-              <div class="offset-md-9"></div>
-              <div class="col-md-1 font-weight-bold">SMA:</div>
-              <div class="col-md-2">some data</div>
-            </div>
-          </div>
-        </div>
-        <br><div class="row">
-            <div class="offset-md-1 col-md-1">
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[0].fallingChannel.higherTradedValue | number:2 }}</div>
-              <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[0].fallingChannel.tradedValue | number:2 }}</div>
-              <div class="row  justify-content-center">{{ selectedRecord.rangeList[0].fallingChannel.lowerTradedValue | number:2 }}</div>
-            </div>
-            <div class="col-md-1">
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[1].fallingChannel.higherTradedValue | number:2 }}</div>
-                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[1].fallingChannel.tradedValue | number:2 }}</div>
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[1].fallingChannel.lowerTradedValue | number:2 }}</div>
-            </div>
-            <div class="col-md-1">
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[2].fallingChannel.higherTradedValue | number:2 }}</div>
-                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[2].fallingChannel.tradedValue | number:2 }}</div>
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[2].fallingChannel.lowerTradedValue | number:2 }}</div>
-            </div>
-            <div class="col-md-1 mt-4">
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[3].fallingChannel.higherTradedValue | number:2 }}</div>
-                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[3].fallingChannel.tradedValue | number:2 }}</div>
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[3].fallingChannel.lowerTradedValue | number:2 }}</div>
-            </div>
-            <div class="col-md-1 mt-4">
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[4].fallingChannel.higherTradedValue | number:2 }}</div>
-                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[4].fallingChannel.tradedValue | number:2 }}</div>
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[4].fallingChannel.lowerTradedValue | number:2 }}</div>
-            </div>
-            <div class="col-md-1">
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[5].fallingChannel.higherTradedValue | number:2 }}</div>
-                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[5].fallingChannel.tradedValue | number:2 }}</div>
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[5].fallingChannel.lowerTradedValue | number:2 }}</div>
-            </div>
-            <div class="col-md-1">
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[6].fallingChannel.higherTradedValue | number:2 }}</div>
-                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[6].fallingChannel.tradedValue | number:2 }}</div>
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[6].fallingChannel.lowerTradedValue | number:2 }}</div>
-            </div>
-            <div class="col-md-1">
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[7].fallingChannel.higherTradedValue | number:2 }}</div>
-                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[7].fallingChannel.tradedValue | number:2 }}</div>
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[7].fallingChannel.lowerTradedValue | number:2 }}</div>
-            </div>
-            <div class="col-md-1">
-                <div class="row  justify-content-center text-white">{{ selectedRecord.rangeList[7].fallingChannel.higherTradedValue | number:2 }}</div>
-                <div class="row justify-content-center bg-danger mh-1">{{ selectedRecord.rangeList[8].fallingChannel.tradedValue | number:2 }}</div>
-                <div class="row  justify-content-center">{{ selectedRecord.rangeList[8].fallingChannel.lowerTradedValue | number:2 }}</div>
-            </div>
-          </div>
-      </div>
-
-      <!-- Modal footer -->
-      <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
 <script>
-  $(function () {
-    $("#example1").DataTable({
-      "lengthMenu": [[500, 650, 1000, -1], [500, 650, 1000, "All"]],
-      "pageLength": 650,
-      "searching": false,
-      "columnDefs": [{
-        "targets": 'no-sort',
-        "orderable": false,
-      }]
-    });
+  Date.prototype.toDateInputValue = (function () {
+    var local = new Date(this);
+    local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+    return local.toJSON().slice(0, 10);
+  });
+  $(document).ready(function () {
+    $('.main-card').height($('.content-wrapper').height());
+    $('.record-container').height($('.content-wrapper').height() * .59);
+    $('.record-view').height($('.content-wrapper').height() * .3);
+  });
 
-    $('.home').on('click',function () {
+  $(function () {
+    // $("#example1").DataTable({
+    //   // "lengthMenu": [[500, 650, 1000, -1], [500, 650, 1000, "All"]],
+    //   // "pageLength": 650,
+
+    //   "paging": false,
+    //   "searching": false,
+    //   "oderable": false,
+    //   "columnDefs": [{
+    //     "targets": 'no-sort',
+    //     "orderable": false,
+    //   }]
+    // });
+
+    $('.home').on('click', function () {
       // reset modal if it isn't visible
       console.log('clicked')
       if (!($('.modal.in').length)) {

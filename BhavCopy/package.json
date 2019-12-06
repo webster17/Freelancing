@@ -1,5 +1,5 @@
 {
-  "name": "bhavcopy",
+  "name": "stock-market",
   "version": "1.0.0",
   "description": "Share MArket app",
   "main": "main.js",
@@ -7,7 +7,7 @@
     "test": "node main.js",
     "start": "electron .",
     "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=src/assets/icons/mac/icon.icns --prune=true --out=release-builds",
-    "package-win": "electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32 --icon=src/assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Stock Market\"",    
+    "package-win": "electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32 --icon=src/assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Stock Market\"",
     "package-linux": "electron-packager . --overwrite --asar=true --platform=linux --arch=x64 --icon=src/assets/icons/png/icon.png --prune=true --out=release-builds"
   },
   "author": "Santosh Dangodara",
@@ -16,6 +16,6 @@
     "electron": "^6.0.11"
   },
   "devDependencies": {
-    "electron-packager": "^14.0.6"
+    "electron-packager": "^14.1.1"
   }
 }

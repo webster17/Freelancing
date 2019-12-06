@@ -28,11 +28,14 @@ public class Range implements Serializable {
       this.risingChannel.setLowerTradedValue((float) Math.floor((risingChannel.getTradedValue() - (risingChannel.getTradedValue() - fallingChannel.getTradedValue()) * 0.382) * 20) / 20);
       this.fallingChannel.setHigherTradedValue((float) Math.ceil(((risingChannel.getTradedValue() - fallingChannel.getTradedValue()) * 0.382 + fallingChannel.getTradedValue()) * 20) / 20);
       this.fallingChannel.setLowerTradedValue((float) Math.floor((fallingChannel.getTradedValue() - (fallingChannel.getTradedValue() - nextRange.fallingChannel.getTradedValue()) * 0.382) * 20) / 20);
-    } else if (previousRange != null && nextRange != null) {
-      this.risingChannel.setHigherTradedValue((float) Math.ceil(((nextRange.getRisingChannel().getTradedValue() - risingChannel.getTradedValue()) * 0.382 + risingChannel.getTradedValue()) * 20) / 20);
+    } else if (previousRange != null) {
       this.risingChannel.setLowerTradedValue((float) Math.floor((risingChannel.getTradedValue() - (risingChannel.getTradedValue() - previousRange.getRisingChannel().getTradedValue()) * 0.382) * 20) / 20);
       this.fallingChannel.setHigherTradedValue((float) Math.ceil(((previousRange.getFallingChannel().getTradedValue() - fallingChannel.getTradedValue()) * 0.382 + fallingChannel.getTradedValue()) * 20) / 20);
-      this.fallingChannel.setLowerTradedValue((float) Math.floor((fallingChannel.getTradedValue() - (fallingChannel.getTradedValue() - nextRange.getFallingChannel().getTradedValue()) * 0.382) * 20) / 20);
+
+      if(nextRange!=null) {
+        this.risingChannel.setHigherTradedValue((float) Math.ceil(((nextRange.getRisingChannel().getTradedValue() - risingChannel.getTradedValue()) * 0.382 + risingChannel.getTradedValue()) * 20) / 20);
+        this.fallingChannel.setLowerTradedValue((float) Math.floor((fallingChannel.getTradedValue() - (fallingChannel.getTradedValue() - nextRange.getFallingChannel().getTradedValue()) * 0.382) * 20) / 20);
+      }
     }
   }
 
